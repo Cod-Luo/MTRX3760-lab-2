@@ -58,12 +58,6 @@ class CLineRobot
         bool mLeftStart;
         bool mCompleted;
 
-        // These three members preserve the state of a bounded search whenever
-        // the forward sensor loses the line at a corner.
-        bool mSearching;
-        float mSearchHeading;
-        float mSearchDirection;
-
         static const float Radius;
 };
 

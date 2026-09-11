@@ -14,14 +14,13 @@ const float CLineRobot::Radius = 15.0f;
 
 CLineRobot::CLineRobot( const Vec2D& aStartPosition, float aStartHeading )
     : mPosition( aStartPosition ), mHeading( aStartHeading ), mStartPosition( aStartPosition ),
-      mCentreSensor( 12.0f, 0.0f ), mSideSensor( 12.0f, 5.0f ),
+      mCentreSensor( 0.25f, 0.0f ), mSideSensor( 0.25f, 6.0f ),
       mLeftSpeed( 0.0f ), mRightSpeed( 0.0f ), mDistanceTravelled( 0.0f ),
       mTrail(), mUpdates( 0 ), mCollisions( 0 ), mWasColliding( false ),
-      mLeftStart( false ), mCompleted( false ), mSearching( false ),
-      mSearchHeading( 0.0f ), mSearchDirection( 1.0f )
+      mLeftStart( false ), mCompleted( false )
 {
-    // Both sensors are inside the radius-15 body, 12 units forward;
-    // the second is 5 units to the right of the centre sensor.
+    // Both sensors sit slightly ahead of the centre to detect departures earlier.
+    // The second sensor is six units to the right to distinguish right turns.
     mTrail.push_back( mPosition );
 }
 
@@ -29,32 +28,22 @@ bool CLineRobot::HasCompletedLap() const { return mCompleted; }
 
 void CLineRobot::Steer( const std::vector<Vec2D>& aLine )
 {
-    const float Speed = 6.0f;
-    const float Turn = 5.0f;
-    const float SweepLimit = 1.5f; // under 90 degrees: do not seek the incoming line behind us
+    const float Speed = 30.0f;
+    const float Turn = 70.0f;
     const bool Centre = mCentreSensor.Read( mPosition, mHeading, aLine );
     const bool Side = mSideSensor.Read( mPosition, mHeading, aLine );
     if( Centre )
     {
-        mSearching = false;
         mLeftSpeed = Speed;
         mRightSpeed = Speed;
     }
     else
     {
-        if( !mSearching )
-        {
-            mSearching = true;
-            mSearchHeading = mHeading;
-            mSearchDirection = Side ? 1.0f : -1.0f;
-        }
-        // Stop translating and sweep either side until the centre sensor sees
-        // the floor line again. This handles both left and right corners.
-        const float Offset = mHeading - mSearchHeading;
-        if( Offset >= SweepLimit ) { mSearchDirection = -1.0f; }
-        if( Offset <= -SweepLimit ) { mSearchDirection = 1.0f; }
-        mLeftSpeed = mSearchDirection * Turn;
-        mRightSpeed = -mSearchDirection * Turn;
+        // If only the right sensor sees the line, steer right. If neither
+        // sensor sees it, steer left. The average forward speed stays constant.
+        const float Correction = Side ? Turn : -Turn;
+        mLeftSpeed = Speed + Correction;
+        mRightSpeed = Speed - Correction;
     }
 }
 
@@ -68,7 +57,7 @@ void CLineRobot::Update( const std::vector<Vec2D>& aLine, const std::vector<Vec2
         Steer( aLine );
         const float Speed = (mLeftSpeed + mRightSpeed) / 2.0f;
         const float TurnRate = (mLeftSpeed - mRightSpeed) / WheelBase;
-        // Screen headings increase clockwise; opposite wheel speeds pivot in place.
+        // Screen headings increase clockwise; wheel-speed difference sets turning.
         mHeading += TurnRate * TimeStep;
         mPosition.x += Speed * std::cos( mHeading ) * TimeStep;
         mPosition.y += Speed * std::sin( mHeading ) * TimeStep;

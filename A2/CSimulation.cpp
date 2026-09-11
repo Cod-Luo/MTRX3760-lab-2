@@ -69,7 +69,7 @@ int CSimulation::Run( bool aHeadless )
             // Rendering batches many fixed simulation updates into each frame.
             // This makes the run practical to watch without using real elapsed
             // time to drive either robot.
-            const int StepsPerFrame = 5;
+            const int StepsPerFrame = 1;
             bool Reported = false;
             while( !Render.WindowShouldClose() )
             {
