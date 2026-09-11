@@ -1,0 +1,102 @@
+//-----------------------------------------------------------------------------
+// CSimulation.cpp
+//
+// Implements the complete A2 run. The A1 wall-following class is used without
+// changing its behaviour, while CLineRobot adds the second required robot.
+//-----------------------------------------------------------------------------
+
+#include "CSimulation.h"
+#include <iostream>
+
+bool CSimulation::LoadMaps()
+{
+    // The original reader is preserved. Check its result and minimum loop size here.
+    const bool Okay = mWalls.ReadFile( "SimpleWalls.map" )
+                    && mLine.ReadFile( "SimpleLine.map" )
+                    && mWalls.GetVertices().size() >= 3 && mLine.GetVertices().size() >= 3;
+    if( !Okay ) { std::cerr << "Could not load both simulation maps.\n"; }
+    return Okay;
+}
+
+void CSimulation::Advance( CRobot& aWallRobot, CLineRobot& aLineRobot ) const
+{
+    if( !aWallRobot.HasCompletedLap() ) { aWallRobot.Update( mWalls.GetVertices() ); }
+    aLineRobot.Update( mLine.GetVertices(), mWalls.GetVertices() );
+}
+
+void CSimulation::DrawLoop( CRender& aRender, const CLoopReader& aLoop, float aThickness ) const
+{
+    const std::vector<Vec2D>& Vertices = aLoop.GetVertices();
+    for( std::size_t i = 0; i < Vertices.size(); ++i )
+    {
+        aRender.DrawLine( Vertices[i], Vertices[(i + 1) % Vertices.size()], aThickness, RAYWHITE );
+    }
+}
+
+void CSimulation::PrintSummary( const CRobot& aWallRobot, const CLineRobot& aLineRobot ) const
+{
+    std::cout << "Wall follower: updates=" << aWallRobot.GetUpdateCount()
+              << ", collisions=" << aWallRobot.GetCollisionCount()
+              << ", lap=" << (aWallRobot.HasCompletedLap() ? "complete" : "incomplete") << '\n';
+    aLineRobot.PrintSummary();
+}
+
+int CSimulation::Run( bool aHeadless )
+{
+    int Result = 1;
+    if( LoadMaps() )
+    {
+        CRobot WallRobot( mWalls.GetStartPose().mPosition, mWalls.GetStartPose().mHeading );
+        CLineRobot LineRobot( mLine.GetStartPose().mPosition, mLine.GetStartPose().mHeading );
+        std::cout << "Wall sensors: 90 degrees=" << WallRobot.GetSensor90Distance( mWalls.GetVertices() )
+                  << ", 45 degrees=" << WallRobot.GetSensor45Distance( mWalls.GetVertices() ) << '\n';
+        const int MaximumUpdates = 200000;
+        int Updates = 0;
+        bool Finished = false;
+        if( aHeadless )
+        {
+            while( !Finished && Updates < MaximumUpdates )
+            {
+                Advance( WallRobot, LineRobot );
+                ++Updates;
+                Finished = WallRobot.HasCompletedLap() && LineRobot.HasCompletedLap();
+            }
+        }
+        else
+        {
+            CRender Render;
+
+            // Rendering batches many fixed simulation updates into each frame.
+            // This makes the run practical to watch without using real elapsed
+            // time to drive either robot.
+            const int StepsPerFrame = 5;
+            bool Reported = false;
+            while( !Render.WindowShouldClose() )
+            {
+                for( int i = 0; i < StepsPerFrame && !Finished && Updates < MaximumUpdates; ++i )
+                {
+                    Advance( WallRobot, LineRobot );
+                    ++Updates;
+                    Finished = WallRobot.HasCompletedLap() && LineRobot.HasCompletedLap();
+                }
+                Render.BeginDrawing();
+                DrawLoop( Render, mWalls, 2.0f );
+                DrawLoop( Render, mLine, 5.0f );
+                WallRobot.Draw( Render );
+                LineRobot.Draw( Render );
+                Render.EndDrawing();
+                if( !Reported && (Finished || Updates == MaximumUpdates) )
+                {
+                    PrintSummary( WallRobot, LineRobot );
+                    std::cout << "Run stopped. The trails remain visible; close the window to exit.\n";
+                    Reported = true;
+                }
+            }
+            Render.CloseWindow();
+        }
+        PrintSummary( WallRobot, LineRobot );
+        const int MaximumCollisions = 10;
+        if( Finished && WallRobot.GetCollisionCount() <= MaximumCollisions ) { Result = 0; }
+    }
+    return Result;
+}
