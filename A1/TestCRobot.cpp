@@ -63,6 +63,15 @@ int CWallFollowerSimulation::Run()
         Render.EndDrawing();
     }
 
+
+    for( int i = 0; i < 180; i++ )
+    {
+        Render.BeginDrawing();
+        DrawLoop( Render, Loop );
+        Robot.Draw( Render );
+        Render.EndDrawing();
+    }
+    
     Render.CloseWindow();
 
     std::cout << "--- Run Summary ---" << std::endl;
