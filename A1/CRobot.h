@@ -1,6 +1,3 @@
-#ifndef CROBOT_H
-#define CROBOT_H
-
 //-----------------------------------------------------------------------------
 // CRobot.h
 //
@@ -8,6 +5,9 @@
 // sensors aimed to its right, steers using their readings, and records its
 // complete trajectory, collisions, and lap completion.
 //-----------------------------------------------------------------------------
+
+#ifndef CROBOT_H
+#define CROBOT_H
 
 #include "CRender.h"
 #include "CSensor.h"
@@ -48,8 +48,8 @@ class CRobot
         int GetCollisionCount() const;
         int GetUpdateCount() const;
 
-        // Returns true once the robot has left its start position and
-        // returned to it again, completing one full lap.
+        // Returns true after the robot has left the starting area, travelled
+        // far enough to cover the room circuit, and returned near the start.
         bool HasCompletedLap() const;
 
     private:

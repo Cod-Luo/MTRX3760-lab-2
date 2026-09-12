@@ -12,6 +12,7 @@
 
 const float CLineRobot::Radius = 15.0f;
 
+//-----------------------------------------------------------------------------
 CLineRobot::CLineRobot( const Vec2D& aStartPosition, float aStartHeading )
     : mPosition( aStartPosition ), mHeading( aStartHeading ), mStartPosition( aStartPosition ),
       mCentreSensor( 0.25f, 0.0f ), mSideSensor( 0.25f, 6.0f ),
@@ -24,8 +25,13 @@ CLineRobot::CLineRobot( const Vec2D& aStartPosition, float aStartHeading )
     mTrail.push_back( mPosition );
 }
 
+//-----------------------------------------------------------------------------
 bool CLineRobot::HasCompletedLap() const { return mCompleted; }
 
+//-----------------------------------------------------------------------------
+// The centre sensor means the robot is correctly placed and can drive ahead.
+// Otherwise, the side reading selects which direction recovers the line.
+//-----------------------------------------------------------------------------
 void CLineRobot::Steer( const std::vector<Vec2D>& aLine )
 {
     const float Speed = 30.0f;
@@ -47,6 +53,7 @@ void CLineRobot::Steer( const std::vector<Vec2D>& aLine )
     }
 }
 
+//-----------------------------------------------------------------------------
 void CLineRobot::Update( const std::vector<Vec2D>& aLine, const std::vector<Vec2D>& aWalls )
 {
     if( !mCompleted )
@@ -74,6 +81,7 @@ void CLineRobot::Update( const std::vector<Vec2D>& aLine, const std::vector<Vec2
     }
 }
 
+//-----------------------------------------------------------------------------
 void CLineRobot::CheckCollision( const std::vector<Vec2D>& aWalls )
 {
     // Count the start of a contact once, rather than counting every update for
@@ -87,6 +95,7 @@ void CLineRobot::CheckCollision( const std::vector<Vec2D>& aWalls )
     mWasColliding = Colliding;
 }
 
+//-----------------------------------------------------------------------------
 void CLineRobot::CheckLap()
 {
     const float LeaveDistance = 100.0f;
@@ -106,6 +115,7 @@ void CLineRobot::CheckLap()
     }
 }
 
+//-----------------------------------------------------------------------------
 void CLineRobot::Draw( CRender& aRender ) const
 {
     for( std::size_t i = 1; i < mTrail.size(); ++i )
@@ -119,6 +129,7 @@ void CLineRobot::Draw( CRender& aRender ) const
     aRender.DrawLine( mPosition, HeadingEnd, 2.0f, BLUE );
 }
 
+//-----------------------------------------------------------------------------
 void CLineRobot::PrintSummary() const
 {
     std::cout << "Line follower: updates=" << mUpdates << ", collisions=" << mCollisions

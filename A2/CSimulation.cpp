@@ -8,9 +8,11 @@
 #include "CSimulation.h"
 #include <iostream>
 
+//-----------------------------------------------------------------------------
 bool CSimulation::LoadMaps()
 {
-    // The original reader is preserved. Check its result and minimum loop size here.
+    // A closed loop needs at least three vertices; rejecting invalid input here
+    // keeps that concern out of both robot classes.
     const bool Okay = mWalls.ReadFile( "SimpleWalls.map" )
                     && mLine.ReadFile( "SimpleLine.map" )
                     && mWalls.GetVertices().size() >= 3 && mLine.GetVertices().size() >= 3;
@@ -18,12 +20,15 @@ bool CSimulation::LoadMaps()
     return Okay;
 }
 
+//-----------------------------------------------------------------------------
 void CSimulation::Advance( CRobot& aWallRobot, CLineRobot& aLineRobot ) const
 {
+    // Each robot freezes at its finishing point while the other completes.
     if( !aWallRobot.HasCompletedLap() ) { aWallRobot.Update( mWalls.GetVertices() ); }
     aLineRobot.Update( mLine.GetVertices(), mWalls.GetVertices() );
 }
 
+//-----------------------------------------------------------------------------
 void CSimulation::DrawLoop( CRender& aRender, const CLoopReader& aLoop, float aThickness ) const
 {
     const std::vector<Vec2D>& Vertices = aLoop.GetVertices();
@@ -33,6 +38,7 @@ void CSimulation::DrawLoop( CRender& aRender, const CLoopReader& aLoop, float aT
     }
 }
 
+//-----------------------------------------------------------------------------
 void CSimulation::PrintSummary( const CRobot& aWallRobot, const CLineRobot& aLineRobot ) const
 {
     std::cout << "Wall follower: updates=" << aWallRobot.GetUpdateCount()
@@ -41,6 +47,7 @@ void CSimulation::PrintSummary( const CRobot& aWallRobot, const CLineRobot& aLin
     aLineRobot.PrintSummary();
 }
 
+//-----------------------------------------------------------------------------
 int CSimulation::Run( bool aHeadless )
 {
     int Result = 1;
@@ -66,9 +73,8 @@ int CSimulation::Run( bool aHeadless )
         {
             CRender Render;
 
-            // Rendering batches many fixed simulation updates into each frame.
-            // This makes the run practical to watch without using real elapsed
-            // time to drive either robot.
+            // One fixed simulation update is shown per rendered frame. Real
+            // elapsed time never enters either robot's movement calculation.
             const int StepsPerFrame = 1;
             bool Reported = false;
             while( !Render.WindowShouldClose() )

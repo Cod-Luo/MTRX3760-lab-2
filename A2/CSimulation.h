@@ -25,14 +25,21 @@ class CSimulation
         int Run( bool aHeadless );
 
     private:
+        // Loads and validates both map files before either robot is created.
         bool LoadMaps();
+
+        // Advances each unfinished robot by one fixed simulation step.
         void Advance( CRobot& aWallRobot, CLineRobot& aLineRobot ) const;
+
+        // Draws every segment of a closed map loop at the requested thickness.
         void DrawLoop( CRender& aRender, const CLoopReader& aLoop, float aThickness ) const;
+
+        // Reports the completion, update, and collision results of both robots.
         void PrintSummary( const CRobot& aWallRobot, const CLineRobot& aLineRobot ) const;
 
-        // The simulation owns both map readers for its complete lifetime.
-        CLoopReader mWalls;
-        CLoopReader mLine;
+        // The simulation retains both maps for sensing and drawing throughout the run.
+        CLoopReader mWalls; // room boundary followed by the range-sensor robot
+        CLoopReader mLine;  // floor line followed by the binary-sensor robot
 };
 
 #endif

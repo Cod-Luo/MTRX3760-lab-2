@@ -1,8 +1,16 @@
+//-----------------------------------------------------------------------------
+// CRobot.cpp
+//
+// Implements the A2 wall follower. The two range readings are converted into
+// differential wheel speeds, then fixed-timestep motion updates the robot.
+//-----------------------------------------------------------------------------
+
 #include "CRobot.h"
+
 #include <cmath>
 #include <iostream>
 
-
+//-----------------------------------------------------------------------------
 CRobot::CRobot( const Vec2D& aStartPos, float aStartHeading )
     : mPosition( aStartPos )
     , mHeading( aStartHeading )
@@ -20,17 +28,22 @@ CRobot::CRobot( const Vec2D& aStartPos, float aStartHeading )
 {
 }
 
-
+//-----------------------------------------------------------------------------
 void CRobot::Update( const std::vector<Vec2D>& aWalls )
 {
+    // Fixed simulated time keeps motion independent of rendering performance.
     const float dt = 0.03f;
     const float WheelBase = 30.0f;
     const float BaseSpeed = 42.0f;
 
+    // The diagonal target is longer because its ray meets a parallel wall at
+    // 45 degrees rather than travelling directly across the clearance.
     const float TargetSideDistance = 45.0f;
     const float TargetDiagonalDistance = TargetSideDistance * 1.41421356f;
     const float MaxSensorDistance = 120.0f;
 
+    // Scaling both gains with BaseSpeed preserves steering authority at the
+    // increased forward speed.
     const float SideGain = 2.1f;
     const float DiagonalGain = 4.2f;
     const float MaxTurn = 157.5f;
@@ -78,8 +91,8 @@ void CRobot::Update( const std::vector<Vec2D>& aWalls )
     }
     mWasColliding = IsColliding;
 
-    // A lap is detected by leaving the start position by some distance,
-    // then returning close to it again.
+    // A lap requires leaving, travelling approximately one circuit, and then
+    // returning close to the initial centre position.
     const float LeaveThreshold = 100.0f;
     const float ReturnThreshold = 5.0f;
     const float MinimumLapDistance = 1500.0f;

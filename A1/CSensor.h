@@ -1,6 +1,3 @@
-#ifndef CSENSOR_H
-#define CSENSOR_H
-
 //-----------------------------------------------------------------------------
 // CSensor.h
 //
@@ -8,6 +5,9 @@
 // to whichever way the robot is facing. It measures the straight-line
 // distance from the robot to the nearest wall along its ray.
 //-----------------------------------------------------------------------------
+
+#ifndef CSENSOR_H
+#define CSENSOR_H
 
 #include "CRender.h"
 

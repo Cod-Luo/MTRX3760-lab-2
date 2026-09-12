@@ -8,9 +8,11 @@
 #include "CLineSensor.h"
 #include <cmath>
 
+//-----------------------------------------------------------------------------
 CLineSensor::CLineSensor( float aForward, float aRight )
     : mForward( aForward ), mRight( aRight ) {}
 
+//-----------------------------------------------------------------------------
 bool CLineSensor::Read( const Vec2D& aPosition, float aHeading,
                         const std::vector<Vec2D>& aLine ) const
 {
@@ -25,6 +27,10 @@ bool CLineSensor::Read( const Vec2D& aPosition, float aHeading,
     return DistanceTo( Location, aLine ) <= HalfLineWidth;
 }
 
+//-----------------------------------------------------------------------------
+// Finds the shortest distance to a closed loop. This shared geometry supports
+// both point-on-line sensing and circular-body collision checks.
+//-----------------------------------------------------------------------------
 float CLineSensor::DistanceTo( const Vec2D& aPoint, const std::vector<Vec2D>& aLoop )
 {
     const float NoHit = 1000000.0f;

@@ -17,8 +17,8 @@
 #include <iostream>
 
 //-----------------------------------------------------------------------------
-// CWallFollowerSimulation owns the map, the robot, and the renderer for the
-// whole run, and reports the sensors, collisions, and final summary.
+// CWallFollowerSimulation coordinates the map, robot, renderer, completion
+// condition, and console reporting for the whole A1 run.
 //-----------------------------------------------------------------------------
 class CWallFollowerSimulation
 {

@@ -34,31 +34,37 @@ class CLineRobot
         void PrintSummary() const;
 
     private:
+        //---Internal simulation steps---
+        // Converts the two binary readings into left and right wheel speeds.
         void Steer( const std::vector<Vec2D>& aLine );
+
+        // Updates the completion state after the robot moves.
         void CheckLap();
+
+        // Counts the beginning of each contact between the disc and a wall.
         void CheckCollision( const std::vector<Vec2D>& aWalls );
 
         //---Pose and sensing---
-        Vec2D mPosition;
-        float mHeading;
-        Vec2D mStartPosition;
-        CLineSensor mCentreSensor;
-        CLineSensor mSideSensor;
+        Vec2D mPosition;      // centre of the robot in map coordinates
+        float mHeading;       // clockwise radians from the positive x direction
+        Vec2D mStartPosition; // reference point used to recognise a lap
+        CLineSensor mCentreSensor; // sensor positioned over the target line
+        CLineSensor mSideSensor;   // offset sensor used to choose turn direction
 
         //---Motion and trail---
-        float mLeftSpeed;
-        float mRightSpeed;
-        float mDistanceTravelled;
-        std::vector<Vec2D> mTrail;
+        float mLeftSpeed;            // independently controlled left wheel
+        float mRightSpeed;           // independently controlled right wheel
+        float mDistanceTravelled;    // prevents an early false lap
+        std::vector<Vec2D> mTrail;   // retained positions for the complete run
 
         //---Run monitoring---
-        int mUpdates;
-        int mCollisions;
-        bool mWasColliding;
-        bool mLeftStart;
-        bool mCompleted;
+        int mUpdates;          // number of fixed simulation steps completed
+        int mCollisions;       // number of separate wall contacts
+        bool mWasColliding;    // distinguishes a new contact from continued contact
+        bool mLeftStart;       // prevents completion at the initial position
+        bool mCompleted;       // set once a full lap is recognised
 
-        static const float Radius;
+        static const float Radius; // shared 15-unit body radius
 };
 
 #endif

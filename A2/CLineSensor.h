@@ -29,6 +29,7 @@ class CLineSensor
         static float DistanceTo( const Vec2D& aPoint, const std::vector<Vec2D>& aLoop );
 
     private:
+        // Sensor position in the robot's local forward/right coordinate frame.
         float mForward;
         float mRight;
 };

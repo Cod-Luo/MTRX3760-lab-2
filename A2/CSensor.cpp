@@ -1,11 +1,23 @@
+//-----------------------------------------------------------------------------
+// CSensor.cpp
+//
+// Implements the range sensor's ray-to-wall intersection calculation.
+//-----------------------------------------------------------------------------
+
 #include "CSensor.h"
+
 #include <cmath>
 
+//-----------------------------------------------------------------------------
 CSensor::CSensor( float aAngleOffsetDeg )
     : mAngleOffsetDeg( aAngleOffsetDeg )
 {
 }
 
+//-----------------------------------------------------------------------------
+// Forms a world-space ray, checks it against every finite wall segment, and
+// returns the nearest intersection in front of the sensor.
+//-----------------------------------------------------------------------------
 float CSensor::GetDistance( const Vec2D& aRobotPos, float aRobotHeading,
                              const std::vector<Vec2D>& aWalls ) const
 {

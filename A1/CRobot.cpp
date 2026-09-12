@@ -35,8 +35,8 @@ CRobot::CRobot( const Vec2D& aStartPos, float aStartHeading )
 //-----------------------------------------------------------------------------
 void CRobot::Update( const std::vector<Vec2D>& aWalls )
 {
-    // Match A2's fixed simulation timestep so both programs advance time in
-    // the same-sized increments when showing one update per rendered frame.
+    // Every call advances the same amount of simulated time, independently of
+    // how long the computer takes to render a frame.
     const float dt = 0.03f;
 
     Steer( aWalls );
@@ -65,6 +65,8 @@ void CRobot::Update( const std::vector<Vec2D>& aWalls )
 void CRobot::Steer( const std::vector<Vec2D>& aWalls )
 {
     const float BaseSpeed = 42.0f;
+    // The side sensor holds this clearance. At 45 degrees, the diagonal ray
+    // travels sqrt( 2 ) times farther to reach the same straight wall.
     const float TargetSideDistance = 45.0f;
     const float TargetDiagonalDistance = TargetSideDistance * 1.41421356f;
     const float MaxSensorDistance = 120.0f;
