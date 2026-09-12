@@ -35,14 +35,20 @@ class CWallFollowerSimulation
         static const int StepsPerFrame;
 };
 
-const int CWallFollowerSimulation::StepsPerFrame = 8;
+const int CWallFollowerSimulation::StepsPerFrame = 1;
 
 //-----------------------------------------------------------------------------
 int CWallFollowerSimulation::Run()
 {
     CLoopReader Loop;
     bool ReadSuccess = Loop.ReadFile( "SimpleWalls.map" );
-    std::cout << "Read " << ( ReadSuccess ? "successful" : "unsuccessful" ) << std::endl;
+    if( !ReadSuccess || Loop.GetVertices().size() < 3 )
+    {
+        std::cerr << "Could not load a valid wall map." << std::endl;
+        return 1;
+    }
+
+    std::cout << "Read successful" << std::endl;
 
     CRobot Robot( Loop.GetStartPose().mPosition, Loop.GetStartPose().mHeading );
     CRender Render;
@@ -50,9 +56,10 @@ int CWallFollowerSimulation::Run()
     std::cout << "Sensor 90: " << Robot.GetSensor90Distance( Loop.GetVertices() ) << std::endl;
     std::cout << "Sensor 45: " << Robot.GetSensor45Distance( Loop.GetVertices() ) << std::endl;
 
-    while( !Render.WindowShouldClose() && !Robot.HasCompletedLap() )
+    bool SummaryPrinted = false;
+    while( !Render.WindowShouldClose() )
     {
-        for( int i = 0; i < StepsPerFrame; i++ )
+        for( int i = 0; i < StepsPerFrame && !Robot.HasCompletedLap(); i++ )
         {
             Robot.Update( Loop.GetVertices() );
         }
@@ -61,24 +68,28 @@ int CWallFollowerSimulation::Run()
         DrawLoop( Render, Loop );
         Robot.Draw( Render );
         Render.EndDrawing();
+
+        if( Robot.HasCompletedLap() && !SummaryPrinted )
+        {
+            std::cout << "--- Run Summary ---" << std::endl;
+            std::cout << "Updates completed: " << Robot.GetUpdateCount() << std::endl;
+            std::cout << "Total collisions: " << Robot.GetCollisionCount() << std::endl;
+            std::cout << "Run complete. Close the window to exit." << std::endl;
+            SummaryPrinted = true;
+        }
     }
 
-
-    for( int i = 0; i < 180; i++ )
-    {
-        Render.BeginDrawing();
-        DrawLoop( Render, Loop );
-        Robot.Draw( Render );
-        Render.EndDrawing();
-    }
-    
     Render.CloseWindow();
 
-    std::cout << "--- Run Summary ---" << std::endl;
-    std::cout << "Updates completed: " << Robot.GetUpdateCount() << std::endl;
-    std::cout << "Total collisions: " << Robot.GetCollisionCount() << std::endl;
+    if( !SummaryPrinted )
+    {
+        std::cout << "--- Run Summary ---" << std::endl;
+        std::cout << "Updates completed: " << Robot.GetUpdateCount() << std::endl;
+        std::cout << "Total collisions: " << Robot.GetCollisionCount() << std::endl;
+        std::cout << "Run ended before the lap was completed." << std::endl;
+    }
 
-    return 0;
+    return Robot.HasCompletedLap() ? 0 : 1;
 }
 
 //-----------------------------------------------------------------------------

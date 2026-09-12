@@ -16,6 +16,7 @@ CRobot::CRobot( const Vec2D& aStartPos, float aStartHeading )
     , mStartPosition( aStartPos )
     , mHasLeftStart( false )
     , mLapCompleted( false )
+    , mDistanceTravelled( 0.0f )
 {
 }
 
@@ -24,15 +25,15 @@ void CRobot::Update( const std::vector<Vec2D>& aWalls )
 {
     const float dt = 0.03f;
     const float WheelBase = 30.0f;
-    const float BaseSpeed = 0.8f;
+    const float BaseSpeed = 42.0f;
 
-    const float TargetSideDistance = 40.0f;
+    const float TargetSideDistance = 45.0f;
     const float TargetDiagonalDistance = TargetSideDistance * 1.41421356f;
     const float MaxSensorDistance = 120.0f;
 
-    const float SideGain = 0.04f;
-    const float DiagonalGain = 0.08f;
-    const float MaxTurn = 3.0f;
+    const float SideGain = 2.1f;
+    const float DiagonalGain = 4.2f;
+    const float MaxTurn = 157.5f;
 
     float Dist90 = mSensor90.GetDistance( mPosition, mHeading, aWalls );
     float Dist45 = mSensor45.GetDistance( mPosition, mHeading, aWalls );
@@ -59,6 +60,7 @@ void CRobot::Update( const std::vector<Vec2D>& aWalls )
     mHeading += TurnRate * dt;
     mPosition.x += ForwardSpeed * std::cos( mHeading ) * dt;
     mPosition.y += ForwardSpeed * std::sin( mHeading ) * dt;
+    mDistanceTravelled += std::fabs( ForwardSpeed ) * dt;
 
     mTrail.push_back( mPosition );
     mUpdateCount++;
@@ -79,7 +81,8 @@ void CRobot::Update( const std::vector<Vec2D>& aWalls )
     // A lap is detected by leaving the start position by some distance,
     // then returning close to it again.
     const float LeaveThreshold = 100.0f;
-    const float ReturnThreshold = 30.0f;
+    const float ReturnThreshold = 5.0f;
+    const float MinimumLapDistance = 1500.0f;
 
     float dx = mPosition.x - mStartPosition.x;
     float dy = mPosition.y - mStartPosition.y;
@@ -90,7 +93,9 @@ void CRobot::Update( const std::vector<Vec2D>& aWalls )
         mHasLeftStart = true;
     }
 
-    if( mHasLeftStart && !mLapCompleted && DistanceFromStart < ReturnThreshold )
+    if( mHasLeftStart && !mLapCompleted
+        && DistanceFromStart < ReturnThreshold
+        && mDistanceTravelled > MinimumLapDistance )
     {
         mLapCompleted = true;
         std::cout << "Lap completed!" << std::endl;
@@ -138,7 +143,3 @@ bool CRobot::HasCompletedLap() const
 {
     return mLapCompleted;
 }
-
-
-
-

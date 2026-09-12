@@ -35,7 +35,9 @@ CRobot::CRobot( const Vec2D& aStartPos, float aStartHeading )
 //-----------------------------------------------------------------------------
 void CRobot::Update( const std::vector<Vec2D>& aWalls )
 {
-    const float dt = 0.8f;
+    // Match A2's fixed simulation timestep so both programs advance time in
+    // the same-sized increments when showing one update per rendered frame.
+    const float dt = 0.03f;
 
     Steer( aWalls );
 
@@ -62,13 +64,15 @@ void CRobot::Update( const std::vector<Vec2D>& aWalls )
 //-----------------------------------------------------------------------------
 void CRobot::Steer( const std::vector<Vec2D>& aWalls )
 {
-    const float BaseSpeed = 0.8f;
-    const float TargetSideDistance = 40.0f;
+    const float BaseSpeed = 42.0f;
+    const float TargetSideDistance = 45.0f;
     const float TargetDiagonalDistance = TargetSideDistance * 1.41421356f;
     const float MaxSensorDistance = 120.0f;
-    const float SideGain = 0.04f;
-    const float DiagonalGain = 0.08f;
-    const float MaxTurn = 3.0f;
+    // These gains are scaled with BaseSpeed so the relationship between
+    // forward motion and steering remains the same as in the slower version.
+    const float SideGain = 2.1f;
+    const float DiagonalGain = 4.2f;
+    const float MaxTurn = 157.5f;
 
     float Dist90 = mSensor90.GetDistance( mPosition, mHeading, aWalls );
     float Dist45 = mSensor45.GetDistance( mPosition, mHeading, aWalls );
@@ -111,7 +115,9 @@ void CRobot::CheckCollision( const std::vector<Vec2D>& aWalls )
 void CRobot::CheckLap()
 {
     const float LeaveThreshold = 100.0f;
-    const float ReturnThreshold = 30.0f;
+    // As with the A2 line follower, require the robot's centre to return very
+    // close to its initial position so the completed trail has no visible gap.
+    const float ReturnThreshold = 5.0f;
 
     // Requiring a minimum distance travelled, in addition to leaving and
     // returning to the start, guards against the lap completing early if
