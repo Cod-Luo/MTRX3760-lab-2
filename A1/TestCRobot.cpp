@@ -35,7 +35,7 @@ class CWallFollowerSimulation
         static const int StepsPerFrame;
 };
 
-const int CWallFollowerSimulation::StepsPerFrame = 20;
+const int CWallFollowerSimulation::StepsPerFrame = 8;
 
 //-----------------------------------------------------------------------------
 int CWallFollowerSimulation::Run()

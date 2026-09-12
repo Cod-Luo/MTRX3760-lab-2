@@ -84,6 +84,7 @@ class CRobot
         Vec2D mStartPosition; // where the robot started, used to detect a lap
         bool mHasLeftStart;   // whether the robot has moved away from the start
         bool mLapCompleted;   // whether a full lap has been completed
+        float mDistanceTravelled;  // total path length covered so far
 
         //---Encapsulated constant---
         static const float Radius; // the robot's body radius, in units

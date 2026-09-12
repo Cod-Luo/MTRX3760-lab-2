@@ -27,6 +27,7 @@ CRobot::CRobot( const Vec2D& aStartPos, float aStartHeading )
     , mStartPosition( aStartPos )
     , mHasLeftStart( false )
     , mLapCompleted( false )
+    , mDistanceTravelled( 0.0f )
 {
     mTrail.push_back( mPosition );
 }
@@ -34,7 +35,7 @@ CRobot::CRobot( const Vec2D& aStartPos, float aStartHeading )
 //-----------------------------------------------------------------------------
 void CRobot::Update( const std::vector<Vec2D>& aWalls )
 {
-    const float dt = 0.03f;
+    const float dt = 0.8f;
 
     Steer( aWalls );
 
@@ -45,6 +46,7 @@ void CRobot::Update( const std::vector<Vec2D>& aWalls )
     mHeading += TurnRate * dt;
     mPosition.x += ForwardSpeed * std::cos( mHeading ) * dt;
     mPosition.y += ForwardSpeed * std::sin( mHeading ) * dt;
+    mDistanceTravelled += std::fabs( ForwardSpeed ) * dt;
 
     mTrail.push_back( mPosition );
     mUpdateCount++;
@@ -111,6 +113,12 @@ void CRobot::CheckLap()
     const float LeaveThreshold = 100.0f;
     const float ReturnThreshold = 30.0f;
 
+    // Requiring a minimum distance travelled, in addition to leaving and
+    // returning to the start, guards against the lap completing early if
+    // the path happens to pass near the start before genuinely going all
+    // the way around the room.
+    const float MinimumLapDistance = 1500.0f;
+
     float dx = mPosition.x - mStartPosition.x;
     float dy = mPosition.y - mStartPosition.y;
     float DistanceFromStart = std::sqrt( dx * dx + dy * dy );
@@ -120,10 +128,12 @@ void CRobot::CheckLap()
         mHasLeftStart = true;
     }
 
-    if( mHasLeftStart && !mLapCompleted && DistanceFromStart < ReturnThreshold )
+    if( mHasLeftStart && !mLapCompleted
+        && DistanceFromStart < ReturnThreshold
+        && mDistanceTravelled > MinimumLapDistance )
     {
         mLapCompleted = true;
-        std::cout << "Lap completed!" << std::endl;
+        std::cout << "Lap completed! Distance travelled: " << mDistanceTravelled << std::endl;
     }
 }
 
