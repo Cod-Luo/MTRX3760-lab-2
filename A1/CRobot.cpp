@@ -1,8 +1,19 @@
+//-----------------------------------------------------------------------------
+// CRobot.cpp
+//
+// Implements the wall-following robot. Its two range sensor readings steer
+// the wheels; collisions are checked against the robot's whole body, not
+// just its two sensor rays.
+//-----------------------------------------------------------------------------
+
 #include "CRobot.h"
+
 #include <cmath>
 #include <iostream>
 
+const float CRobot::Radius = 15.0f;
 
+//-----------------------------------------------------------------------------
 CRobot::CRobot( const Vec2D& aStartPos, float aStartHeading )
     : mPosition( aStartPos )
     , mHeading( aStartHeading )
@@ -17,42 +28,17 @@ CRobot::CRobot( const Vec2D& aStartPos, float aStartHeading )
     , mHasLeftStart( false )
     , mLapCompleted( false )
 {
+    mTrail.push_back( mPosition );
 }
 
-
+//-----------------------------------------------------------------------------
 void CRobot::Update( const std::vector<Vec2D>& aWalls )
 {
     const float dt = 0.03f;
+
+    Steer( aWalls );
+
     const float WheelBase = 30.0f;
-    const float BaseSpeed = 0.8f;
-
-    const float TargetSideDistance = 40.0f;
-    const float TargetDiagonalDistance = TargetSideDistance * 1.41421356f;
-    const float MaxSensorDistance = 120.0f;
-
-    const float SideGain = 0.04f;
-    const float DiagonalGain = 0.08f;
-    const float MaxTurn = 3.0f;
-
-    float Dist90 = mSensor90.GetDistance( mPosition, mHeading, aWalls );
-    float Dist45 = mSensor45.GetDistance( mPosition, mHeading, aWalls );
-
-    if( Dist90 > MaxSensorDistance ) Dist90 = MaxSensorDistance;
-    if( Dist45 > MaxSensorDistance ) Dist45 = MaxSensorDistance;
-    
-
-    // Steer based on both sensors together: the 90-degree sensor keeps the
-    // robot at the target distance from the wall beside it, and the
-    // 45-degree sensor gives an early warning of corners ahead.
-    float Turn = SideGain * ( Dist90 - TargetSideDistance )
-               + DiagonalGain * ( Dist45 - TargetDiagonalDistance );
-
-    if( Turn > MaxTurn )  Turn = MaxTurn;
-    if( Turn < -MaxTurn ) Turn = -MaxTurn;
-
-    mLeftWheelSpeed  = BaseSpeed + Turn;
-    mRightWheelSpeed = BaseSpeed - Turn;
-
     float ForwardSpeed = ( mLeftWheelSpeed + mRightWheelSpeed ) / 2.0f;
     float TurnRate = ( mLeftWheelSpeed - mRightWheelSpeed ) / WheelBase;
 
@@ -63,21 +49,65 @@ void CRobot::Update( const std::vector<Vec2D>& aWalls )
     mTrail.push_back( mPosition );
     mUpdateCount++;
 
+    CheckCollision( aWalls );
+    CheckLap();
+}
 
-    // A collision is when either sensor reports a wall closer than the
-    // robot's own radius. Only count a new collision when it *starts*
-    // touching, not every update it remains touching.
-    const float RobotRadius = 15.0f;
-    bool IsColliding = ( Dist90 < RobotRadius || Dist45 < RobotRadius );
+//-----------------------------------------------------------------------------
+// Reads both sensors and decides the two wheel speeds. The 90-degree sensor
+// keeps the robot at the target distance from the wall beside it; the
+// 45-degree sensor gives an early warning of corners ahead.
+//-----------------------------------------------------------------------------
+void CRobot::Steer( const std::vector<Vec2D>& aWalls )
+{
+    const float BaseSpeed = 0.8f;
+    const float TargetSideDistance = 40.0f;
+    const float TargetDiagonalDistance = TargetSideDistance * 1.41421356f;
+    const float MaxSensorDistance = 120.0f;
+    const float SideGain = 0.04f;
+    const float DiagonalGain = 0.08f;
+    const float MaxTurn = 3.0f;
+
+    float Dist90 = mSensor90.GetDistance( mPosition, mHeading, aWalls );
+    float Dist45 = mSensor45.GetDistance( mPosition, mHeading, aWalls );
+
+    if( Dist90 > MaxSensorDistance ) Dist90 = MaxSensorDistance;
+    if( Dist45 > MaxSensorDistance ) Dist45 = MaxSensorDistance;
+
+    float Turn = SideGain * ( Dist90 - TargetSideDistance )
+               + DiagonalGain * ( Dist45 - TargetDiagonalDistance );
+
+    if( Turn > MaxTurn )  Turn = MaxTurn;
+    if( Turn < -MaxTurn ) Turn = -MaxTurn;
+
+    mLeftWheelSpeed  = BaseSpeed + Turn;
+    mRightWheelSpeed = BaseSpeed - Turn;
+}
+
+//-----------------------------------------------------------------------------
+// A collision is when the robot's whole body (its 15-unit radius disc) comes
+// within Radius of any wall segment, not just where a sensor happens to
+// point. Only count the start of a collision, not every update it remains
+// touching the same wall.
+//-----------------------------------------------------------------------------
+void CRobot::CheckCollision( const std::vector<Vec2D>& aWalls )
+{
+    bool IsColliding = DistanceToNearestWall( mPosition, aWalls ) <= Radius;
+
     if( IsColliding && !mWasColliding )
     {
         mCollisionCount++;
         std::cout << "Collision! Total so far: " << mCollisionCount << std::endl;
     }
     mWasColliding = IsColliding;
+}
 
-    // A lap is detected by leaving the start position by some distance,
-    // then returning close to it again.
+//-----------------------------------------------------------------------------
+// A lap is detected by leaving the start position by some distance, then
+// returning close to it again.
+//-----------------------------------------------------------------------------
+void CRobot::CheckLap()
+{
     const float LeaveThreshold = 100.0f;
     const float ReturnThreshold = 30.0f;
 
@@ -97,6 +127,53 @@ void CRobot::Update( const std::vector<Vec2D>& aWalls )
     }
 }
 
+//-----------------------------------------------------------------------------
+// Returns the distance from aPoint to the nearest point on the wall loop
+// aWalls, checking every segment. Each segment runs from one vertex to the
+// next, wrapping the last back to the first.
+//-----------------------------------------------------------------------------
+float CRobot::DistanceToNearestWall( const Vec2D& aPoint,
+                                     const std::vector<Vec2D>& aWalls )
+{
+    float ClosestDistance = 999.0f;
+
+    for( size_t i = 0; i < aWalls.size(); i++ )
+    {
+        const Vec2D& Start = aWalls[i];
+        const Vec2D& End = aWalls[ (i + 1) % aWalls.size() ];
+
+        float SegmentX = End.x - Start.x;
+        float SegmentY = End.y - Start.y;
+        float ToPointX = aPoint.x - Start.x;
+        float ToPointY = aPoint.y - Start.y;
+
+        float SegmentLengthSquared = SegmentX * SegmentX + SegmentY * SegmentY;
+        float Fraction = 0.0f;
+        if( SegmentLengthSquared > 0.0f )
+        {
+            Fraction = ( ToPointX * SegmentX + ToPointY * SegmentY ) / SegmentLengthSquared;
+        }
+
+        // Clamp so the closest point is never past either end of the segment.
+        if( Fraction < 0.0f ) Fraction = 0.0f;
+        if( Fraction > 1.0f ) Fraction = 1.0f;
+
+        float ClosestX = Start.x + Fraction * SegmentX;
+        float ClosestY = Start.y + Fraction * SegmentY;
+        float DiffX = aPoint.x - ClosestX;
+        float DiffY = aPoint.y - ClosestY;
+        float Distance = std::sqrt( DiffX * DiffX + DiffY * DiffY );
+
+        if( Distance < ClosestDistance )
+        {
+            ClosestDistance = Distance;
+        }
+    }
+
+    return ClosestDistance;
+}
+
+//-----------------------------------------------------------------------------
 void CRobot::Draw( CRender& aRender ) const
 {
     for( size_t i = 1; i < mTrail.size(); i++ )
@@ -104,7 +181,6 @@ void CRobot::Draw( CRender& aRender ) const
         aRender.DrawLine( mTrail[i - 1], mTrail[i], 1.0f, YELLOW );
     }
 
-    const float Radius = 15.0f;
     aRender.DrawCircle( mPosition, (int)Radius, RED );
 
     const float HeadingLineLength = Radius * 2.0f;
@@ -114,6 +190,7 @@ void CRobot::Draw( CRender& aRender ) const
     aRender.DrawLine( mPosition, HeadingEnd, 2.0f, RED );
 }
 
+//-----------------------------------------------------------------------------
 float CRobot::GetSensor90Distance( const std::vector<Vec2D>& aWalls ) const
 {
     return mSensor90.GetDistance( mPosition, mHeading, aWalls );
@@ -138,9 +215,3 @@ bool CRobot::HasCompletedLap() const
 {
     return mLapCompleted;
 }
-
-
-
-
-
-
