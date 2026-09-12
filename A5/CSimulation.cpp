@@ -7,7 +7,10 @@ bool CSimulation::LoadMaps()
     const bool Okay = mWalls.ReadFile( "SimpleWalls.map" )
                     && mLine.ReadFile( "SimpleLine.map" )
                     && mWalls.GetVertices().size() >= 3 && mLine.GetVertices().size() >= 3;
-    if( !Okay ) { std::cerr << "Could not load both simulation maps.\n"; }
+    if( !Okay )
+    {
+        std::cerr << "Could not load both simulation maps.\n";
+    }
     return Okay;
 }
 
@@ -22,10 +25,10 @@ void CSimulation::CreateRobots( unsigned int aSeed )
         // Distinct seeds give every robot its own stream; no generator is shared.
         const unsigned int WallSeed = aSeed + 2u * static_cast<unsigned int>( i );
         const unsigned int LineSeed = WallSeed + 1u;
-        mWallRobots.push_back( CRobot( mWalls.GetStartPose().mPosition,
-                                     mWalls.GetStartPose().mHeading, WallSeed ) );
-        mLineRobots.push_back( CLineRobot( mLine.GetStartPose().mPosition,
-                                         mLine.GetStartPose().mHeading, LineSeed ) );
+        mWallRobots.push_back( CRobot( mWalls.GetStartPosition(),
+                                      mWalls.GetStartHeading(), WallSeed ) );
+        mLineRobots.push_back( CLineRobot( mLine.GetStartPosition(),
+                                          mLine.GetStartHeading(), LineSeed ) );
     }
 }
 
@@ -43,8 +46,12 @@ int CSimulation::CountCompleted( bool aWall ) const
     int Count = 0;
     for( int i = 0; i < RobotsPerType; ++i )
     {
-        const CNoisyMotion& Motion = aWall ? mWallRobots[i].GetMotion() : mLineRobots[i].GetMotion();
-        if( Motion.HasCompletedLap() ) { ++Count; }
+        const bool Completed = aWall ? mWallRobots[i].HasCompletedLap()
+                                     : mLineRobots[i].HasCompletedLap();
+        if( Completed )
+        {
+            ++Count;
+        }
     }
     return Count;
 }
@@ -66,10 +73,19 @@ void CSimulation::DrawLoop( CRender& aRender, const CLoopReader& aLoop, float aT
 
 void CSimulation::Draw( CRender& aRender ) const
 {
-    // Use the same trail, body and heading colours as A1 and A2.
-    const CRender::Colour Yellow = { 253, 249, 0, 255 };
-    const CRender::Colour Green = { 0, 228, 48, 255 };
+    // Several related colours make overlapping noisy paths distinguishable in
+    // the final screenshot while retaining A2's yellow/green visual grouping.
+    const int TrailColourCount = 5;
+    const CRender::Colour WallTrailColours[TrailColourCount] = {
+        { 253, 249, 0, 255 }, { 255, 210, 0, 255 }, { 255, 170, 0, 255 },
+        { 255, 235, 90, 255 }, { 220, 255, 40, 255 }
+    };
+    const CRender::Colour LineTrailColours[TrailColourCount] = {
+        { 0, 228, 48, 255 }, { 0, 200, 110, 255 }, { 40, 255, 90, 255 },
+        { 0, 235, 180, 255 }, { 120, 255, 80, 255 }
+    };
     const CRender::Colour Red = { 230, 41, 55, 255 };
+    const CRender::Colour Yellow = { 253, 249, 0, 255 };
     const CRender::Colour SkyBlue = { 102, 191, 255, 255 };
     const CRender::Colour Blue = { 0, 121, 241, 255 };
     aRender.BeginDrawing();
@@ -77,34 +93,21 @@ void CSimulation::Draw( CRender& aRender ) const
     DrawLoop( aRender, mLine, 5.0f );
     for( int i = 0; i < RobotsPerType; ++i )
     {
-        mWallRobots[i].GetMotion().DrawTrail( aRender, Yellow );
-        mLineRobots[i].GetMotion().DrawTrail( aRender, Green );
-    }
-    for( int i = 0; i < RobotsPerType; ++i )
-    {
-        mWallRobots[i].GetMotion().DrawBody( aRender, Red, Red );
-        mLineRobots[i].GetMotion().DrawBody( aRender, SkyBlue, Blue );
+        const int ColourIndex = i % TrailColourCount;
+        mWallRobots[i].Draw( aRender, WallTrailColours[ColourIndex], Red, Yellow );
+        mLineRobots[i].Draw( aRender, LineTrailColours[ColourIndex], SkyBlue, Blue );
     }
     aRender.EndDrawing();
 }
 
-void CSimulation::PrintSummary( int aUpdates, unsigned int aSeed ) const
+void CSimulation::PrintSummary( int aUpdates ) const
 {
-    std::cout << "Seed: " << aSeed << "; simulation updates: " << aUpdates << '\n';
-    for( int i = 0; i < RobotsPerType; ++i )
-    {
-        const CNoisyMotion& Wall = mWallRobots[i].GetMotion();
-        const CNoisyMotion& Line = mLineRobots[i].GetMotion();
-        std::cout << "Robot " << i + 1 << ": wall=" << (Wall.HasCompletedLap() ? "complete" : "incomplete")
-                  << " (" << Wall.GetUpdateCount() << "), line="
-                  << (Line.HasCompletedLap() ? "complete" : "incomplete")
-                  << " (" << Line.GetUpdateCount() << ")\n";
-    }
-    std::cout << "Completed: wall " << CountCompleted( true ) << "/20, line "
-              << CountCompleted( false ) << "/20\n";
+    std::cout << "Simulation updates: " << aUpdates << '\n'
+              << "Completed: wall " << CountCompleted( true ) << '/' << RobotsPerType
+              << ", line " << CountCompleted( false ) << '/' << RobotsPerType << '\n';
 }
 
-int CSimulation::Run( bool aHeadless )
+int CSimulation::Run()
 {
     int Result = 1;
     if( LoadMaps() )
@@ -112,36 +115,27 @@ int CSimulation::Run( bool aHeadless )
         const unsigned int Seed = 3760u;
         CreateRobots( Seed );
         int Updates = 0;
-        if( aHeadless )
+        bool SummaryPrinted = false;
+        CRender Render;
+        while( !Render.WindowShouldClose() )
         {
-            while( !AllCompleted() && Updates < MaximumUpdates )
+            if( !AllCompleted() && Updates < MaximumUpdates )
             {
                 Advance();
                 ++Updates;
             }
-        }
-        else
-        {
-            CRender Render;
-            const int StepsPerFrame = 1;
-            bool Reported = false;
-            while( !Render.WindowShouldClose() )
+            const bool Stopped = AllCompleted() || Updates == MaximumUpdates;
+            Draw( Render );
+            if( Stopped && !SummaryPrinted )
             {
-                for( int i = 0; i < StepsPerFrame && !AllCompleted() && Updates < MaximumUpdates; ++i )
-                {
-                    Advance();
-                    ++Updates;
-                }
-                const bool Stopped = AllCompleted() || Updates == MaximumUpdates;
-                Draw( Render );
-                if( Stopped && !Reported )
-                {
-                    PrintSummary( Updates, Seed );
-                    Reported = true;
-                }
+                PrintSummary( Updates );
+                SummaryPrinted = true;
             }
         }
-        PrintSummary( Updates, Seed );
+        if( !SummaryPrinted )
+        {
+            PrintSummary( Updates );
+        }
         // A5 requires most of each type, and does not grade collision counts.
         if( CountCompleted( true ) > RobotsPerType / 2
             && CountCompleted( false ) > RobotsPerType / 2 )

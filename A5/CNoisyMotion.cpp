@@ -4,13 +4,10 @@
 
 CNoisyMotion::CNoisyMotion( const Vec2D& aStart, float aHeading,
                           unsigned int aSeed, float aMinimumTravel,
-                          float aReturnDistance, bool aReverseCourse,
-                          float aCheckpointRadius )
+                          float aReturnDistance )
     : mNoise( aSeed ), mPosition( aStart ), mHeading( aHeading ), mStart( aStart ),
       mMinimumTravel( aMinimumTravel ), mReturnDistance( aReturnDistance ),
-      mReverseCourse( aReverseCourse ), mCheckpointRadius( aCheckpointRadius ),
-      mCheckpointsVisited( 0 ),
-      mTravel( 0.0f ), mLeftStart( false ), mCompleted( false ), mUpdates( 0 ), mTrail()
+      mTravel( 0.0f ), mLeftStart( false ), mCompleted( false ), mTrail()
 {
     mPosition.x += mNoise.PositionOffset();
     mPosition.y += mNoise.PositionOffset();
@@ -19,8 +16,7 @@ CNoisyMotion::CNoisyMotion( const Vec2D& aStart, float aHeading,
     mTrail.push_back( mPosition );
 }
 
-void CNoisyMotion::Advance( float aLeftSpeed, float aRightSpeed,
-                           const std::vector<Vec2D>& aCourse )
+void CNoisyMotion::Advance( float aLeftSpeed, float aRightSpeed )
 {
     if( !mCompleted )
     {
@@ -34,29 +30,13 @@ void CNoisyMotion::Advance( float aLeftSpeed, float aRightSpeed,
         mPosition.x += Travel * std::cos( mHeading );
         mPosition.y += Travel * std::sin( mHeading );
         mTravel += std::fabs( Travel );
-        ++mUpdates;
-        CheckLap( aCourse );
+        CheckLap();
         mTrail.push_back( mPosition );
     }
 }
 
-void CNoisyMotion::CheckLap( const std::vector<Vec2D>& aCourse )
+void CNoisyMotion::CheckLap()
 {
-    // The supplied maps start beside vertex zero. Require each subsequent
-    // corner in traversal order, then vertex zero again. This monitoring data
-    // never changes a wheel command: only the sensors determine the route.
-    if( mCheckpointsVisited < aCourse.size() )
-    {
-        const std::size_t Next = mCheckpointsVisited + 1;
-        const std::size_t Index = mReverseCourse ? (aCourse.size() - Next) % aCourse.size()
-                                                : Next % aCourse.size();
-        const float CheckDx = mPosition.x - aCourse[Index].x;
-        const float CheckDy = mPosition.y - aCourse[Index].y;
-        if( CheckDx * CheckDx + CheckDy * CheckDy < mCheckpointRadius * mCheckpointRadius )
-        {
-            ++mCheckpointsVisited;
-        }
-    }
     const float LeaveDistance = 100.0f;
     const float Dx = mPosition.x - mStart.x;
     const float Dy = mPosition.y - mStart.y;
@@ -65,8 +45,9 @@ void CNoisyMotion::CheckLap( const std::vector<Vec2D>& aCourse )
     {
         mLeftStart = true;
     }
-    if( !aCourse.empty() && mCheckpointsVisited == aCourse.size()
-        && mLeftStart && mTravel > mMinimumTravel
+    // Leaving the start and travelling the course length prevents small local
+    // movements from being mistaken for a completed lap.
+    if( mLeftStart && mTravel > mMinimumTravel
         && DistanceSquared < mReturnDistance * mReturnDistance )
     {
         mCompleted = true;
@@ -76,7 +57,6 @@ void CNoisyMotion::CheckLap( const std::vector<Vec2D>& aCourse )
 const Vec2D& CNoisyMotion::GetPosition() const { return mPosition; }
 float CNoisyMotion::GetHeading() const { return mHeading; }
 bool CNoisyMotion::HasCompletedLap() const { return mCompleted; }
-int CNoisyMotion::GetUpdateCount() const { return mUpdates; }
 
 void CNoisyMotion::DrawTrail( CRender& aRender, CRender::Colour aColour ) const
 {

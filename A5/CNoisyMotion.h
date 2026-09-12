@@ -9,38 +9,32 @@
 class CNoisyMotion
 {
     public:
-        // The supplied courses start near vertex zero. aReverseCourse selects
-        // the wall follower's reverse vertex order for lap monitoring only.
-        // Travel/return thresholds and checkpoint radius use map distance units.
+        // Travel and return thresholds use map distance units;
+        // aHeading is measured in radians clockwise from the positive x axis.
         CNoisyMotion( const Vec2D& aStart, float aHeading, unsigned int aSeed,
-                      float aMinimumTravel, float aReturnDistance,
-                      bool aReverseCourse, float aCheckpointRadius );
+                      float aMinimumTravel, float aReturnDistance );
         // Wheel speeds are converted to travel using a fixed 0.03-second step.
-        // aCourse is used only to check progress after movement, never to steer.
-        void Advance( float aLeftSpeed, float aRightSpeed, const std::vector<Vec2D>& aCourse );
+        void Advance( float aLeftSpeed, float aRightSpeed );
+
+        // Read-only state used by each controller and by the simulation summary.
         const Vec2D& GetPosition() const;
         float GetHeading() const;
         bool HasCompletedLap() const;
-        int GetUpdateCount() const;
         void DrawTrail( CRender& aRender, CRender::Colour aColour ) const;
         void DrawBody( CRender& aRender, CRender::Colour aBodyColour,
                        CRender::Colour aHeadingColour ) const;
 
     private:
-        void CheckLap( const std::vector<Vec2D>& aCourse );
+        void CheckLap();
         CNoise mNoise;
         Vec2D mPosition;
         float mHeading;
         Vec2D mStart;
         float mMinimumTravel;
         float mReturnDistance;
-        bool mReverseCourse;            // traversal order for completion monitoring
-        float mCheckpointRadius;        // allows clearance and noisy cornering
-        std::size_t mCheckpointsVisited; // prevents shortcuts from counting as laps
         float mTravel;
         bool mLeftStart;
         bool mCompleted;
-        int mUpdates;
         std::vector<Vec2D> mTrail;
 };
 #endif

@@ -1,8 +1,8 @@
 //-----------------------------------------------------------------------------
 // CLoopReader.h
 //
-// Reads a loop file and stores the single closed loop it describes: a name, a
-// starting pose, and a list of vertices. A loop file describes a shape only;
+// Reads a loop file and stores the single closed loop it describes: a starting
+// pose and a list of vertices. A loop file describes a shape only;
 // it knows nothing about rooms, lines or robots. SimpleWalls.map and
 // SimpleLine.map are two example files.
 //
@@ -42,15 +42,6 @@
 #include <vector>
 
 //-----------------------------------------------------------------------------
-// A pose: a position together with a heading, in radians.
-//-----------------------------------------------------------------------------
-struct CPose
-{
-    Vec2D mPosition;
-    float mHeading;   // radians; 0 faces +x (right), PI/2 faces +y (down)
-};
-
-//-----------------------------------------------------------------------------
 // CLoopReader: reads one loop file and stores the closed loop it describes.
 //-----------------------------------------------------------------------------
 class CLoopReader
@@ -60,18 +51,20 @@ class CLoopReader
         CLoopReader();
 
         //---File reading---
+        // Replaces any previously loaded loop. Returns false for an incomplete
+        // file or a line that does not match the documented map format.
         bool ReadFile( const std::string& arFilename );
 
         //---Access to the loop that was read---
-        const std::string& GetName() const;
-        const CPose& GetStartPose() const;
+        const Vec2D& GetStartPosition() const;
+        float GetStartHeading() const;
         const std::vector<Vec2D>& GetVertices() const;
 
     private:
         static const float DegreesToRadians;
         //---The loop---
-        std::string mName;
-        CPose mStartPose;
+        Vec2D mStartPosition;
+        float mStartHeading;
         std::vector<Vec2D> mVertices;   // the loop's corners; last joins to first
 };
 

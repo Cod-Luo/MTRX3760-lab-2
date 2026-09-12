@@ -3,8 +3,7 @@
 
 CRobot::CRobot( const Vec2D& aStart, float aHeading, unsigned int aSeed )
     // Require 1500 units of travel and a return within 15 units of the start.
-    // Wall corners are visited in reverse map order, with 100-unit clearance.
-    : mMotion( aStart, aHeading, aSeed, 1500.0f, 15.0f, true, 100.0f ),
+    : mMotion( aStart, aHeading, aSeed, 1500.0f, 15.0f ),
       mSensor90( 90.0f ), mSensor45( 45.0f )
 {
 }
@@ -24,14 +23,37 @@ void CRobot::Update( const std::vector<Vec2D>& aWalls )
         const float MaxTurn = 157.5f;
         float Dist90 = mSensor90.GetDistance( mMotion.GetPosition(), mMotion.GetHeading(), aWalls );
         float Dist45 = mSensor45.GetDistance( mMotion.GetPosition(), mMotion.GetHeading(), aWalls );
-        if( Dist90 > MaxSensorDistance ) { Dist90 = MaxSensorDistance; }
-        if( Dist45 > MaxSensorDistance ) { Dist45 = MaxSensorDistance; }
+        if( Dist90 > MaxSensorDistance )
+        {
+            Dist90 = MaxSensorDistance;
+        }
+        if( Dist45 > MaxSensorDistance )
+        {
+            Dist45 = MaxSensorDistance;
+        }
         float Turn = SideGain * (Dist90 - TargetSideDistance)
                    + DiagonalGain * (Dist45 - TargetDiagonalDistance);
-        if( Turn > MaxTurn ) { Turn = MaxTurn; }
-        if( Turn < -MaxTurn ) { Turn = -MaxTurn; }
-        mMotion.Advance( BaseSpeed + Turn, BaseSpeed - Turn, aWalls );
+        if( Turn > MaxTurn )
+        {
+            Turn = MaxTurn;
+        }
+        if( Turn < -MaxTurn )
+        {
+            Turn = -MaxTurn;
+        }
+        mMotion.Advance( BaseSpeed + Turn, BaseSpeed - Turn );
     }
 }
 
-const CNoisyMotion& CRobot::GetMotion() const { return mMotion; }
+bool CRobot::HasCompletedLap() const
+{
+    return mMotion.HasCompletedLap();
+}
+
+void CRobot::Draw( CRender& aRender, CRender::Colour aTrailColour,
+                   CRender::Colour aBodyColour,
+                   CRender::Colour aHeadingColour ) const
+{
+    mMotion.DrawTrail( aRender, aTrailColour );
+    mMotion.DrawBody( aRender, aBodyColour, aHeadingColour );
+}

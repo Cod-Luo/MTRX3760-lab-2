@@ -25,10 +25,11 @@ class CLineSensor
         bool Read( const Vec2D& aPosition, float aHeading,
                    const std::vector<Vec2D>& aLine ) const;
 
-        // Shared segment-distance calculation for floor sensing and disc collisions.
-        static float DistanceTo( const Vec2D& aPoint, const std::vector<Vec2D>& aLoop );
-
     private:
+        // Finds the shortest distance between a point and the closed floor line.
+        static float DistanceTo( const Vec2D& aPoint,
+                                 const std::vector<Vec2D>& aLoop );
+
         // Sensor position in the robot's local forward/right coordinate frame.
         float mForward;
         float mRight;

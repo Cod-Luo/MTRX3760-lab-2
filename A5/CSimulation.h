@@ -8,8 +8,8 @@
 class CSimulation
 {
     public:
-        // Runs the simulation; headless mode skips the window as in A2.
-        int Run( bool aHeadless );
+        // Runs and draws both populations until the window closes.
+        int Run();
     private:
         bool LoadMaps();
         void CreateRobots( unsigned int aSeed );
@@ -18,7 +18,7 @@ class CSimulation
         bool AllCompleted() const;
         void DrawLoop( CRender& aRender, const CLoopReader& aLoop, float aThickness ) const;
         void Draw( CRender& aRender ) const;
-        void PrintSummary( int aUpdates, unsigned int aSeed ) const;
+        void PrintSummary( int aUpdates ) const;
         static const int RobotsPerType = 20;
         static const int MaximumUpdates = 12000;
         CLoopReader mWalls;

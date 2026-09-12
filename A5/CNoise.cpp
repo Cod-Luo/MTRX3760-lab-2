@@ -1,9 +1,8 @@
-// CNoise.cpp - Wheel calibration error plus fresh zero-mean slip each update.
+// CNoise.cpp - Starting-pose error plus fresh zero-mean wheel slip each update.
 #include "CNoise.h"
 
 CNoise::CNoise( unsigned int aSeed )
-    : mGenerator( aSeed ), mUniform( -1.0f, 1.0f ),
-      mLeftBias( Sample( 0.04f ) ), mRightBias( Sample( 0.04f ) )
+    : mGenerator( aSeed ), mUniform( -1.0f, 1.0f )
 {
 }
 
@@ -27,6 +26,6 @@ float CNoise::HeadingOffset()
 void CNoise::PerturbTravel( float& aLeft, float& aRight )
 {
     const float StepVariation = 0.15f;
-    aLeft *= 1.0f + mLeftBias + Sample( StepVariation );
-    aRight *= 1.0f + mRightBias + Sample( StepVariation );
+    aLeft *= 1.0f + Sample( StepVariation );
+    aRight *= 1.0f + Sample( StepVariation );
 }

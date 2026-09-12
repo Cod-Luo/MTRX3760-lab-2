@@ -7,9 +7,19 @@
 class CRobot
 {
     public:
+        // Creates a wall follower at the supplied map pose. Heading is radians.
         CRobot( const Vec2D& aStart, float aHeading, unsigned int aSeed );
+
+        // Reads both range sensors, chooses wheel speeds, and advances one step.
         void Update( const std::vector<Vec2D>& aWalls );
-        const CNoisyMotion& GetMotion() const;
+
+        // Reports progress without exposing the robot's internal motion object.
+        bool HasCompletedLap() const;
+
+        // Draws the complete trail, body and contrasting heading indicator.
+        void Draw( CRender& aRender, CRender::Colour aTrailColour,
+                   CRender::Colour aBodyColour,
+                   CRender::Colour aHeadingColour ) const;
     private:
         CNoisyMotion mMotion;
         CSensor mSensor90;
