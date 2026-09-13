@@ -7,7 +7,7 @@
 #ifndef CSIMULATION_H
 #define CSIMULATION_H
 #include "CLoopReader.h"
-#include "CRobot.h"
+#include "CWallRobot.h"
 #include "CLineRobot.h"
 
 class CSimulation
@@ -36,7 +36,7 @@ class CSimulation
         //---Owned maps and robot populations---
         CLoopReader mWalls;
         CLoopReader mLine;
-        std::vector<CRobot> mWallRobots;
+        std::vector<CWallRobot> mWallRobots;
         std::vector<CLineRobot> mLineRobots;
 };
 #endif

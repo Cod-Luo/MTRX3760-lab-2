@@ -24,7 +24,7 @@ bool CSimulation::LoadMaps()
 }
 
 //-----------------------------------------------------------------------------
-void CSimulation::Advance( CRobot& aWallRobot, CLineRobot& aLineRobot ) const
+void CSimulation::Advance( CWallRobot& aWallRobot, CLineRobot& aLineRobot ) const
 {
     // Each robot freezes at its finishing point while the other completes.
     if( !aWallRobot.HasCompletedLap() )
@@ -45,7 +45,7 @@ void CSimulation::DrawLoop( CRender& aRender, const CLoopReader& aLoop, float aT
 }
 
 //-----------------------------------------------------------------------------
-void CSimulation::PrintSummary( const CRobot& aWallRobot, const CLineRobot& aLineRobot ) const
+void CSimulation::PrintSummary( const CWallRobot& aWallRobot, const CLineRobot& aLineRobot ) const
 {
     std::cout << "Wall follower updates: " << aWallRobot.GetUpdateCount() << '\n'
               << "Wall follower collisions: " << aWallRobot.GetCollisionCount() << '\n';
@@ -58,7 +58,7 @@ int CSimulation::Run()
     int Result = 1;
     if( LoadMaps() )
     {
-        CRobot WallRobot( mWalls.GetStartPose().mPosition, mWalls.GetStartPose().mHeading );
+        CWallRobot WallRobot( mWalls.GetStartPose().mPosition, mWalls.GetStartPose().mHeading );
         CLineRobot LineRobot( mLine.GetStartPose().mPosition, mLine.GetStartPose().mHeading );
         const int MaximumUpdates = 200000;
         int Updates = 0;

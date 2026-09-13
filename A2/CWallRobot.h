@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// CRobot.h
+// CWallRobot.h
 //
 // Declares the wall-following robot used in A2. The robot carries two range
 // sensors aimed to its right, steers using their readings, and records its
@@ -15,17 +15,17 @@
 #include <vector>
 
 //-----------------------------------------------------------------------------
-// CRobot follows the wall on its right hand side using two range sensors.
+// CWallRobot follows the wall on its right hand side using two range sensors.
 // It also detects collisions against the whole robot body (not just its
 // sensor rays), and decides when it has completed one lap.
 //-----------------------------------------------------------------------------
-class CRobot
+class CWallRobot
 {
     public:
         //---Ctor---
         // Creates a radius-15 robot at aStartPos, facing aStartHeading
         // (in radians, clockwise from the positive x axis).
-        CRobot( const Vec2D& aStartPos, float aStartHeading );
+        CWallRobot( const Vec2D& aStartPos, float aStartHeading );
 
         //---Simulation---
         // Advances the simulation by one fixed timestep: reads the sensors,

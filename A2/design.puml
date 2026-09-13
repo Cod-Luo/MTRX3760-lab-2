@@ -6,7 +6,7 @@ skinparam style strictuml
 class CSimulation
 class CLoopReader
 class CRender
-class CRobot
+class CWallRobot
 class CLineRobot
 class CSensor
 class CLineSensor
@@ -17,15 +17,15 @@ CSimulation *-- "2" CLoopReader
 ' Run() creates the renderer and robots as locals, not contained members.
 ' Association represents these uses.
 CSimulation --> CRender
-CSimulation --> CRobot
+CSimulation --> CWallRobot
 CSimulation --> CLineRobot
 
 ' Each robot contains exactly two sensors of its own type.
-CRobot *-- "2" CSensor
+CWallRobot *-- "2" CSensor
 CLineRobot *-- "2" CLineSensor
 
 ' Draw() receives the shared renderer by reference.
-CRobot --> CRender
+CWallRobot --> CRender
 CLineRobot --> CRender
 
 ' No inheritance: CLineRobot and CLineSensor are independent classes.

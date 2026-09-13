@@ -1,0 +1,15 @@
+# macOS metadata
+.DS_Store
+
+# Compiled programs and object files
+*.o
+TestCRobot
+TestLoopReader
+TestRender
+
+# Local assignment and lecture reference material
+Lab 2 - Robot Simulator.pdf
+Lec *.pdf
+
+# Local report workspace
+latex/

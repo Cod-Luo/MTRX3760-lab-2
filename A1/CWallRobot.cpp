@@ -1,20 +1,20 @@
 //-----------------------------------------------------------------------------
-// CRobot.cpp
+// CWallRobot.cpp
 //
 // Implements the wall-following robot. Its two range sensor readings steer
 // the wheels; collisions are checked against the robot's whole body, not
 // just its two sensor rays.
 //-----------------------------------------------------------------------------
 
-#include "CRobot.h"
+#include "CWallRobot.h"
 
 #include <cmath>
 #include <iostream>
 
-const float CRobot::Radius = 15.0f;
+const float CWallRobot::Radius = 15.0f;
 
 //-----------------------------------------------------------------------------
-CRobot::CRobot( const Vec2D& aStartPos, float aStartHeading )
+CWallRobot::CWallRobot( const Vec2D& aStartPos, float aStartHeading )
     : mPosition( aStartPos )
     , mHeading( aStartHeading )
     , mSensor90( 90.0f )
@@ -33,7 +33,7 @@ CRobot::CRobot( const Vec2D& aStartPos, float aStartHeading )
 }
 
 //-----------------------------------------------------------------------------
-void CRobot::Update( const std::vector<Vec2D>& aWalls )
+void CWallRobot::Update( const std::vector<Vec2D>& aWalls )
 {
     // Every call advances the same amount of simulated time, independently of
     // how long the computer takes to render a frame.
@@ -62,7 +62,7 @@ void CRobot::Update( const std::vector<Vec2D>& aWalls )
 // keeps the robot at the target distance from the wall beside it; the
 // 45-degree sensor gives an early warning of corners ahead.
 //-----------------------------------------------------------------------------
-void CRobot::Steer( const std::vector<Vec2D>& aWalls )
+void CWallRobot::Steer( const std::vector<Vec2D>& aWalls )
 {
     const float BaseSpeed = 42.0f;
     // The side sensor holds this clearance. At 45 degrees, the diagonal ray
@@ -110,14 +110,14 @@ void CRobot::Steer( const std::vector<Vec2D>& aWalls )
 // point. Only count the start of a collision, not every update it remains
 // touching the same wall.
 //-----------------------------------------------------------------------------
-void CRobot::CheckCollision( const std::vector<Vec2D>& aWalls )
+void CWallRobot::CheckCollision( const std::vector<Vec2D>& aWalls )
 {
     bool IsColliding = DistanceToNearestWall( mPosition, aWalls ) <= Radius;
 
     if( IsColliding && !mWasColliding )
     {
         mCollisionCount++;
-        std::cout << "Wall collision at update " << mUpdateCount
+        std::cout << "Collision at update " << mUpdateCount
                   << "; total collisions=" << mCollisionCount << std::endl;
     }
     mWasColliding = IsColliding;
@@ -127,7 +127,7 @@ void CRobot::CheckCollision( const std::vector<Vec2D>& aWalls )
 // A lap is detected by leaving the start position by some distance, then
 // returning close to it again.
 //-----------------------------------------------------------------------------
-void CRobot::CheckLap()
+void CWallRobot::CheckLap()
 {
     const float LeaveThreshold = 100.0f;
     // As with the A2 line follower, require the robot's centre to return very
@@ -162,7 +162,7 @@ void CRobot::CheckLap()
 // aWalls, checking every segment. Each segment runs from one vertex to the
 // next, wrapping the last back to the first.
 //-----------------------------------------------------------------------------
-float CRobot::DistanceToNearestWall( const Vec2D& aPoint,
+float CWallRobot::DistanceToNearestWall( const Vec2D& aPoint,
                                      const std::vector<Vec2D>& aWalls )
 {
     float ClosestDistance = 999.0f;
@@ -210,7 +210,7 @@ float CRobot::DistanceToNearestWall( const Vec2D& aPoint,
 }
 
 //-----------------------------------------------------------------------------
-void CRobot::Draw( CRender& aRender ) const
+void CWallRobot::Draw( CRender& aRender ) const
 {
     for( size_t i = 1; i < mTrail.size(); i++ )
     {
@@ -227,27 +227,27 @@ void CRobot::Draw( CRender& aRender ) const
 }
 
 //-----------------------------------------------------------------------------
-float CRobot::GetSensor90Distance( const std::vector<Vec2D>& aWalls ) const
+float CWallRobot::GetSensor90Distance( const std::vector<Vec2D>& aWalls ) const
 {
     return mSensor90.GetDistance( mPosition, mHeading, aWalls );
 }
 
-float CRobot::GetSensor45Distance( const std::vector<Vec2D>& aWalls ) const
+float CWallRobot::GetSensor45Distance( const std::vector<Vec2D>& aWalls ) const
 {
     return mSensor45.GetDistance( mPosition, mHeading, aWalls );
 }
 
-int CRobot::GetCollisionCount() const
+int CWallRobot::GetCollisionCount() const
 {
     return mCollisionCount;
 }
 
-int CRobot::GetUpdateCount() const
+int CWallRobot::GetUpdateCount() const
 {
     return mUpdateCount;
 }
 
-bool CRobot::HasCompletedLap() const
+bool CWallRobot::HasCompletedLap() const
 {
     return mLapCompleted;
 }

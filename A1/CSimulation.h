@@ -9,7 +9,7 @@
 #define CSIMULATION_H
 
 #include "CLoopReader.h"
-#include "CRobot.h"
+#include "CWallRobot.h"
 
 class CSimulation
 {
