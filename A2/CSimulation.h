@@ -19,10 +19,10 @@ class CSimulation
 {
     public:
         // Runs until both laps finish, the update limit is reached, or the user
-        // closes the window. aHeadless skips drawing for automated verification.
+        // closes the window.
         // Returns zero only when both robots finish and the wall robot remains
         // within the assignment's collision limit.
-        int Run( bool aHeadless );
+        int Run();
 
     private:
         // Loads and validates both map files before either robot is created.

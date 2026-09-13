@@ -10,6 +10,8 @@
 #include <cmath>
 #include <iostream>
 
+const float CRobot::Radius = 15.0f;
+
 //-----------------------------------------------------------------------------
 CRobot::CRobot( const Vec2D& aStartPos, float aStartHeading )
     : mPosition( aStartPos )
@@ -26,6 +28,7 @@ CRobot::CRobot( const Vec2D& aStartPos, float aStartHeading )
     , mLapCompleted( false )
     , mDistanceTravelled( 0.0f )
 {
+    mTrail.push_back( mPosition );
 }
 
 //-----------------------------------------------------------------------------
@@ -79,11 +82,9 @@ void CRobot::Update( const std::vector<Vec2D>& aWalls )
     mUpdateCount++;
 
 
-    // A collision is when either sensor reports a wall closer than the
-    // robot's own radius. Only count a new collision when it *starts*
-    // touching, not every update it remains touching.
-    const float RobotRadius = 15.0f;
-    bool IsColliding = ( Dist90 < RobotRadius || Dist45 < RobotRadius );
+    // Match A1: check the complete radius-15 disc against every wall segment.
+    // Only count a new collision when contact starts.
+    bool IsColliding = DistanceToNearestWall( mPosition, aWalls ) <= Radius;
     if( IsColliding && !mWasColliding )
     {
         mCollisionCount++;
@@ -115,6 +116,39 @@ void CRobot::Update( const std::vector<Vec2D>& aWalls )
     }
 }
 
+//-----------------------------------------------------------------------------
+float CRobot::DistanceToNearestWall( const Vec2D& aPoint,
+                                     const std::vector<Vec2D>& aWalls )
+{
+    float ClosestDistance = 999.0f;
+    for( std::size_t i = 0; i < aWalls.size(); ++i )
+    {
+        const Vec2D& Start = aWalls[i];
+        const Vec2D& End = aWalls[(i + 1) % aWalls.size()];
+        const float SegmentX = End.x - Start.x;
+        const float SegmentY = End.y - Start.y;
+        const float ToPointX = aPoint.x - Start.x;
+        const float ToPointY = aPoint.y - Start.y;
+        const float SegmentLengthSquared = SegmentX * SegmentX + SegmentY * SegmentY;
+
+        float Fraction = 0.0f;
+        if( SegmentLengthSquared > 0.0f )
+        {
+            Fraction = (ToPointX * SegmentX + ToPointY * SegmentY)
+                     / SegmentLengthSquared;
+        }
+        if( Fraction < 0.0f ) Fraction = 0.0f;
+        if( Fraction > 1.0f ) Fraction = 1.0f;
+
+        const float DifferenceX = aPoint.x - (Start.x + Fraction * SegmentX);
+        const float DifferenceY = aPoint.y - (Start.y + Fraction * SegmentY);
+        const float Distance = std::sqrt( DifferenceX * DifferenceX
+                                        + DifferenceY * DifferenceY );
+        if( Distance < ClosestDistance ) ClosestDistance = Distance;
+    }
+    return ClosestDistance;
+}
+
 void CRobot::Draw( CRender& aRender ) const
 {
     for( size_t i = 1; i < mTrail.size(); i++ )
@@ -122,7 +156,6 @@ void CRobot::Draw( CRender& aRender ) const
         aRender.DrawLine( mTrail[i - 1], mTrail[i], 1.0f, YELLOW );
     }
 
-    const float Radius = 15.0f;
     aRender.DrawCircle( mPosition, (int)Radius, RED );
 
     const float HeadingLineLength = Radius * 2.0f;

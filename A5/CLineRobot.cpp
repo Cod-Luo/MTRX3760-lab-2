@@ -2,8 +2,9 @@
 #include "CLineRobot.h"
 
 CLineRobot::CLineRobot( const Vec2D& aStart, float aHeading, unsigned int aSeed )
-    // Require 900 units of travel and a return within 8 units of the start.
-    : mMotion( aStart, aHeading, aSeed, 900.0f, 8.0f ),
+    // Preserve A2's minimum travel. The wider return tolerance accommodates
+    // the deliberately perturbed starting pose without changing steering.
+    : mMotion( aStart, aHeading, aSeed, 500.0f, 15.0f ),
       mCentreSensor( 0.25f, 0.0f ), mSideSensor( 0.25f, 6.0f )
 {
 }

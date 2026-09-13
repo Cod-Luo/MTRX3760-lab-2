@@ -60,10 +60,7 @@ bool CNoisyMotion::HasCompletedLap() const { return mCompleted; }
 
 void CNoisyMotion::DrawTrail( CRender& aRender, CRender::Colour aColour ) const
 {
-    for( std::size_t i = 1; i < mTrail.size(); ++i )
-    {
-        aRender.DrawLine( mTrail[i - 1], mTrail[i], 0.7f, aColour );
-    }
+    aRender.DrawLineStrip( mTrail, aColour );
 }
 
 void CNoisyMotion::DrawBody( CRender& aRender, CRender::Colour aBodyColour,

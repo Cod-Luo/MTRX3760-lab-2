@@ -2,6 +2,8 @@
 #ifndef CRENDER_H
 #define CRENDER_H
 
+#include <vector>
+
 struct Vec2D
 {
     float x;
@@ -26,6 +28,8 @@ class CRender
         void EndDrawing();
         void DrawCircle( Vec2D aPosition, int aRadius, Colour aColour );
         void DrawLine( Vec2D aStart, Vec2D aEnd, float aThickness, Colour aColour );
+        // Draws every point in a trajectory as one connected path.
+        void DrawLineStrip( const std::vector<Vec2D>& aPoints, Colour aColour );
     private:
         CRender( const CRender& ) = delete;
         CRender& operator=( const CRender& ) = delete;

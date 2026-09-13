@@ -50,6 +50,11 @@ class CRobot
         bool HasCompletedLap() const;
 
     private:
+        // Finds the shortest distance from the robot centre to the wall loop.
+        // Collision detection uses the whole disc, not only the sensor rays.
+        static float DistanceToNearestWall( const Vec2D& aPoint,
+                                            const std::vector<Vec2D>& aWalls );
+
         //---Pose and sensing---
         Vec2D mPosition; // the robot's current x/y position
         float mHeading;  // the robot's current facing direction, in radians
@@ -71,6 +76,8 @@ class CRobot
         bool mHasLeftStart;   // whether the robot has moved away from the start
         bool mLapCompleted;   // whether a full lap has been completed
         float mDistanceTravelled; // total path length, preventing an early lap
+
+        static const float Radius;
 };
 
 #endif

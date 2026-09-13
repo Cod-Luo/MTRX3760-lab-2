@@ -48,7 +48,7 @@ void CSimulation::PrintSummary( const CRobot& aWallRobot, const CLineRobot& aLin
 }
 
 //-----------------------------------------------------------------------------
-int CSimulation::Run( bool aHeadless )
+int CSimulation::Run()
 {
     int Result = 1;
     if( LoadMaps() )
@@ -60,47 +60,38 @@ int CSimulation::Run( bool aHeadless )
         const int MaximumUpdates = 200000;
         int Updates = 0;
         bool Finished = false;
-        if( aHeadless )
+        bool SummaryPrinted = false;
+        CRender Render;
+
+        // One fixed simulation update is shown per rendered frame. Real
+        // elapsed time never enters either robot's movement calculation.
+        const int StepsPerFrame = 1;
+        while( !Render.WindowShouldClose() )
         {
-            while( !Finished && Updates < MaximumUpdates )
+            for( int i = 0; i < StepsPerFrame && !Finished && Updates < MaximumUpdates; ++i )
             {
                 Advance( WallRobot, LineRobot );
                 ++Updates;
                 Finished = WallRobot.HasCompletedLap() && LineRobot.HasCompletedLap();
             }
-        }
-        else
-        {
-            CRender Render;
-
-            // One fixed simulation update is shown per rendered frame. Real
-            // elapsed time never enters either robot's movement calculation.
-            const int StepsPerFrame = 1;
-            bool Reported = false;
-            while( !Render.WindowShouldClose() )
+            Render.BeginDrawing();
+            DrawLoop( Render, mWalls, 2.0f );
+            DrawLoop( Render, mLine, 5.0f );
+            WallRobot.Draw( Render );
+            LineRobot.Draw( Render );
+            Render.EndDrawing();
+            if( !SummaryPrinted && (Finished || Updates == MaximumUpdates) )
             {
-                for( int i = 0; i < StepsPerFrame && !Finished && Updates < MaximumUpdates; ++i )
-                {
-                    Advance( WallRobot, LineRobot );
-                    ++Updates;
-                    Finished = WallRobot.HasCompletedLap() && LineRobot.HasCompletedLap();
-                }
-                Render.BeginDrawing();
-                DrawLoop( Render, mWalls, 2.0f );
-                DrawLoop( Render, mLine, 5.0f );
-                WallRobot.Draw( Render );
-                LineRobot.Draw( Render );
-                Render.EndDrawing();
-                if( !Reported && (Finished || Updates == MaximumUpdates) )
-                {
-                    PrintSummary( WallRobot, LineRobot );
-                    std::cout << "Run stopped. The trails remain visible; close the window to exit.\n";
-                    Reported = true;
-                }
+                PrintSummary( WallRobot, LineRobot );
+                std::cout << "Run stopped. The trails remain visible; close the window to exit.\n";
+                SummaryPrinted = true;
             }
-            Render.CloseWindow();
         }
-        PrintSummary( WallRobot, LineRobot );
+        Render.CloseWindow();
+        if( !SummaryPrinted )
+        {
+            PrintSummary( WallRobot, LineRobot );
+        }
         const int MaximumCollisions = 10;
         if( Finished && WallRobot.GetCollisionCount() <= MaximumCollisions ) { Result = 0; }
     }

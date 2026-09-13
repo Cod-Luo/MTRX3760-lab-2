@@ -2,7 +2,8 @@
 #include "CRobot.h"
 
 CRobot::CRobot( const Vec2D& aStart, float aHeading, unsigned int aSeed )
-    // Require 1500 units of travel and a return within 15 units of the start.
+    // Preserve A2's minimum travel. The wider return tolerance accommodates
+    // the deliberately perturbed starting pose without changing steering.
     : mMotion( aStart, aHeading, aSeed, 1500.0f, 15.0f ),
       mSensor90( 90.0f ), mSensor45( 45.0f )
 {
@@ -16,10 +17,9 @@ void CRobot::Update( const std::vector<Vec2D>& aWalls )
         const float TargetSideDistance = 45.0f;
         const float TargetDiagonalDistance = TargetSideDistance * 1.41421356f;
         const float MaxSensorDistance = 120.0f;
-        // Gentler feedback leaves the wheel disturbances visible while still
-        // correcting the course using the same two sensor errors as A2.
-        const float SideGain = 0.45f;
-        const float DiagonalGain = 0.9f;
+        // Preserve A2's controller so differences arise from noise alone.
+        const float SideGain = 2.1f;
+        const float DiagonalGain = 4.2f;
         const float MaxTurn = 157.5f;
         float Dist90 = mSensor90.GetDistance( mMotion.GetPosition(), mMotion.GetHeading(), aWalls );
         float Dist45 = mSensor45.GetDistance( mMotion.GetPosition(), mMotion.GetHeading(), aWalls );
