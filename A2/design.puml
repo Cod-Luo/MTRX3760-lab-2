@@ -2,8 +2,6 @@
 ' Major classes only; value types (Vec2D, CPose) and libraries are omitted.
 skinparam classAttributeIconSize 0
 skinparam style strictuml
-hide members
-hide circle
 
 class CSimulation
 class CLoopReader
