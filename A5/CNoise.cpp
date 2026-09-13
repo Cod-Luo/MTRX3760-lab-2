@@ -38,7 +38,7 @@ float CNoise::WheelScale()
 {
     // A six-percent calibration range creates persistent lateral variation
     // while leaving the sensor feedback strong enough to complete each course.
-    const float MaximumScaleError = 0.20f;
+    const float MaximumScaleError = 0.50f;
     return 1.0f + Sample( MaximumScaleError );
 }
 
