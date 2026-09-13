@@ -1,9 +1,9 @@
 //-----------------------------------------------------------------------------
 // CRobot.h
 //
-// Declares the wall-following robot used alongside the line follower in A2.
-// It owns two right-facing range sensors, its motion state, complete trail,
-// collision count, and lap-completion state.
+// Declares the wall-following robot used in A2. The robot carries two range
+// sensors aimed to its right, steers using their readings, and records its
+// complete trajectory, collisions, and lap completion.
 //-----------------------------------------------------------------------------
 
 #ifndef CROBOT_H
@@ -11,23 +11,26 @@
 
 #include "CRender.h"
 #include "CSensor.h"
+
 #include <vector>
 
 //-----------------------------------------------------------------------------
-// CRobot follows the wall on its right using distances reported by sensors at
-// 90 and 45 degrees. Its two wheel speeds determine translation and rotation.
+// CRobot follows the wall on its right hand side using two range sensors.
+// It also detects collisions against the whole robot body (not just its
+// sensor rays), and decides when it has completed one lap.
 //-----------------------------------------------------------------------------
 class CRobot
 {
     public:
         //---Ctor---
-        // Creates a radius-15 robot at aStartPos. aStartHeading is clockwise
-        // in radians from the positive x direction.
+        // Creates a radius-15 robot at aStartPos, facing aStartHeading
+        // (in radians, clockwise from the positive x axis).
         CRobot( const Vec2D& aStartPos, float aStartHeading );
 
         //---Simulation---
-        // Reads both range sensors, sets the wheel speeds, advances one fixed
-        // timestep, and updates the trail, collisions, and lap state.
+        // Advances the simulation by one fixed timestep: reads the sensors,
+        // decides new wheel speeds, moves the robot, and checks for
+        // collisions and lap completion.
         void Update( const std::vector<Vec2D>& aWalls );
 
         //---Drawing---
@@ -41,7 +44,7 @@ class CRobot
         float GetSensor45Distance( const std::vector<Vec2D>& aWalls ) const;
 
         //---Run status---
-        // These values are used by CSimulation for the final run summary.
+        // Returns how many collisions, and how many updates, have happened.
         int GetCollisionCount() const;
         int GetUpdateCount() const;
 
@@ -50,8 +53,14 @@ class CRobot
         bool HasCompletedLap() const;
 
     private:
-        // Finds the shortest distance from the robot centre to the wall loop.
-        // Collision detection uses the whole disc, not only the sensor rays.
+        //---Internal steps of Update, split out for readability---
+        void Steer( const std::vector<Vec2D>& aWalls );
+        void CheckCollision( const std::vector<Vec2D>& aWalls );
+        void CheckLap();
+
+        //---Collision geometry---
+        // Distance from aPoint to the nearest point on the wall loop aWalls,
+        // checking every segment (not just where a sensor happens to point).
         static float DistanceToNearestWall( const Vec2D& aPoint,
                                             const std::vector<Vec2D>& aWalls );
 
@@ -75,9 +84,10 @@ class CRobot
         Vec2D mStartPosition; // where the robot started, used to detect a lap
         bool mHasLeftStart;   // whether the robot has moved away from the start
         bool mLapCompleted;   // whether a full lap has been completed
-        float mDistanceTravelled; // total path length, preventing an early lap
+        float mDistanceTravelled;  // total path length covered so far
 
-        static const float Radius;
+        //---Encapsulated constant---
+        static const float Radius; // the robot's body radius, in units
 };
 
 #endif

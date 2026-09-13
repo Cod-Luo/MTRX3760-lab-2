@@ -79,14 +79,26 @@ void CRobot::Steer( const std::vector<Vec2D>& aWalls )
     float Dist90 = mSensor90.GetDistance( mPosition, mHeading, aWalls );
     float Dist45 = mSensor45.GetDistance( mPosition, mHeading, aWalls );
 
-    if( Dist90 > MaxSensorDistance ) Dist90 = MaxSensorDistance;
-    if( Dist45 > MaxSensorDistance ) Dist45 = MaxSensorDistance;
+    if( Dist90 > MaxSensorDistance )
+    {
+        Dist90 = MaxSensorDistance;
+    }
+    if( Dist45 > MaxSensorDistance )
+    {
+        Dist45 = MaxSensorDistance;
+    }
 
     float Turn = SideGain * ( Dist90 - TargetSideDistance )
                + DiagonalGain * ( Dist45 - TargetDiagonalDistance );
 
-    if( Turn > MaxTurn )  Turn = MaxTurn;
-    if( Turn < -MaxTurn ) Turn = -MaxTurn;
+    if( Turn > MaxTurn )
+    {
+        Turn = MaxTurn;
+    }
+    if( Turn < -MaxTurn )
+    {
+        Turn = -MaxTurn;
+    }
 
     mLeftWheelSpeed  = BaseSpeed + Turn;
     mRightWheelSpeed = BaseSpeed - Turn;
@@ -173,8 +185,14 @@ float CRobot::DistanceToNearestWall( const Vec2D& aPoint,
         }
 
         // Clamp so the closest point is never past either end of the segment.
-        if( Fraction < 0.0f ) Fraction = 0.0f;
-        if( Fraction > 1.0f ) Fraction = 1.0f;
+        if( Fraction < 0.0f )
+        {
+            Fraction = 0.0f;
+        }
+        if( Fraction > 1.0f )
+        {
+            Fraction = 1.0f;
+        }
 
         float ClosestX = Start.x + Fraction * SegmentX;
         float ClosestY = Start.y + Fraction * SegmentY;

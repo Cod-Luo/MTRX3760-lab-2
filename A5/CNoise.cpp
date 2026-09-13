@@ -1,14 +1,16 @@
-// CNoise.cpp - Starting-pose error plus fresh zero-mean wheel slip each update.
+// CNoise.cpp - Uses the rand() approach shown in the lectures and example code.
 #include "CNoise.h"
+#include <cstdlib>
 
-CNoise::CNoise( unsigned int aSeed )
-    : mGenerator( aSeed ), mUniform( -1.0f, 1.0f )
+CNoise::CNoise( float aMaximumTravelOffset )
+    : mMaximumTravelOffset( aMaximumTravelOffset )
 {
 }
 
 float CNoise::Sample( float aMagnitude )
 {
-    return aMagnitude * mUniform( mGenerator );
+    const float Fraction = float( std::rand() ) / float( RAND_MAX );
+    return aMagnitude * (2.0f * Fraction - 1.0f);
 }
 
 float CNoise::PositionOffset()
@@ -25,7 +27,6 @@ float CNoise::HeadingOffset()
 
 void CNoise::PerturbTravel( float& aLeft, float& aRight )
 {
-    const float StepVariation = 0.15f;
-    aLeft *= 1.0f + Sample( StepVariation );
-    aRight *= 1.0f + Sample( StepVariation );
+    aLeft += Sample( mMaximumTravelOffset );
+    aRight += Sample( mMaximumTravelOffset );
 }

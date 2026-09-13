@@ -50,6 +50,7 @@ class CLineRobot
         Vec2D mStartPosition; // reference point used to recognise a lap
         CLineSensor mCentreSensor; // sensor positioned over the target line
         CLineSensor mSideSensor;   // offset sensor used to choose turn direction
+        bool mTurnRight;           // remembered recovery direction at a corner
 
         //---Motion and trail---
         float mLeftSpeed;            // independently controlled left wheel

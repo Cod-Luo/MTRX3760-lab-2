@@ -1,10 +1,10 @@
 // CRobot.cpp - Sensor feedback steers; wheel noise is applied after control.
 #include "CRobot.h"
 
-CRobot::CRobot( const Vec2D& aStart, float aHeading, unsigned int aSeed )
+CRobot::CRobot( const Vec2D& aStart, float aHeading )
     // Preserve A2's minimum travel. The wider return tolerance accommodates
-    // the deliberately perturbed starting pose without changing steering.
-    : mMotion( aStart, aHeading, aSeed, 1500.0f, 15.0f ),
+    // the deliberately perturbed starting pose.
+    : mMotion( aStart, aHeading, 1500.0f, 15.0f, 1.0f ),
       mSensor90( 90.0f ), mSensor45( 45.0f )
 {
 }
@@ -17,7 +17,6 @@ void CRobot::Update( const std::vector<Vec2D>& aWalls )
         const float TargetSideDistance = 45.0f;
         const float TargetDiagonalDistance = TargetSideDistance * 1.41421356f;
         const float MaxSensorDistance = 120.0f;
-        // Preserve A2's controller so differences arise from noise alone.
         const float SideGain = 2.1f;
         const float DiagonalGain = 4.2f;
         const float MaxTurn = 157.5f;

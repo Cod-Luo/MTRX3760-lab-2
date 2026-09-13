@@ -14,8 +14,8 @@
 class CSimulation
 {
     public:
-        // Runs until the robot completes one lap or the window is closed.
-        // Returns zero only when the lap is completed.
+        // Stops movement after one lap and displays the trail until the window closes.
+        // Returns zero for a completed lap with at most ten collisions.
         int Run();
 
     private:

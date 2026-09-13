@@ -1,11 +1,11 @@
-// CLineRobot.cpp - The unchanged A2 sensor logic drives independently noisy wheels.
+// CLineRobot.cpp - Two line sensors guide noisy motion through corners.
 #include "CLineRobot.h"
 
-CLineRobot::CLineRobot( const Vec2D& aStart, float aHeading, unsigned int aSeed )
-    // Preserve A2's minimum travel. The wider return tolerance accommodates
-    // the deliberately perturbed starting pose without changing steering.
-    : mMotion( aStart, aHeading, aSeed, 500.0f, 15.0f ),
-      mCentreSensor( 0.25f, 0.0f ), mSideSensor( 0.25f, 6.0f )
+CLineRobot::CLineRobot( const Vec2D& aStart, float aHeading )
+    // Forward-mounted sensors detect corners before the centre passes them.
+    // Their small forward offset detects corners shortly before the centre arrives.
+    : mMotion( aStart, aHeading, 500.0f, 15.0f, 1.0f ),
+      mCentreSensor( 4.0f, 0.0f ), mSideSensor( 4.0f, 5.0f ), mTurnRight( false )
 {
 }
 
@@ -14,15 +14,31 @@ void CLineRobot::Update( const std::vector<Vec2D>& aLine )
     if( !mMotion.HasCompletedLap() )
     {
         const float Speed = 30.0f;
-        const float Turn = 70.0f;
+        const float Turn = 45.0f;
+        const float CornerSpeed = 27.0f;
         const bool Centre = mCentreSensor.Read( mMotion.GetPosition(), mMotion.GetHeading(), aLine );
         const bool Side = mSideSensor.Read( mMotion.GetPosition(), mMotion.GetHeading(), aLine );
         float Correction = 0.0f;
-        if( !Centre )
+        // The side sensor can detect a right corner while the centre sensor
+        // still sees the incoming segment, so give that reading priority.
+        if( Side )
         {
-            Correction = Side ? Turn : -Turn;
+            mTurnRight = true;
+            Correction = Turn;
         }
-        mMotion.Advance( Speed + Correction, Speed - Correction );
+        else if( !Centre )
+        {
+            // Keep the last recovery direction across a gap at the corner.
+            Correction = mTurnRight ? Turn : -Turn;
+        }
+        else
+        {
+            // Centre-only contact restores normal tracking.
+            mTurnRight = false;
+        }
+        // Slower cornering prevents the robot overshooting the outgoing line.
+        const float ForwardSpeed = Correction == 0.0f ? Speed : CornerSpeed;
+        mMotion.Advance( ForwardSpeed + Correction, ForwardSpeed - Correction );
     }
 }
 

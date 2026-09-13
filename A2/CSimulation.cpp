@@ -16,7 +16,10 @@ bool CSimulation::LoadMaps()
     const bool Okay = mWalls.ReadFile( "SimpleWalls.map" )
                     && mLine.ReadFile( "SimpleLine.map" )
                     && mWalls.GetVertices().size() >= 3 && mLine.GetVertices().size() >= 3;
-    if( !Okay ) { std::cerr << "Could not load both simulation maps.\n"; }
+    if( !Okay )
+    {
+        std::cerr << "Could not load both simulation maps.\n";
+    }
     return Okay;
 }
 
@@ -24,7 +27,10 @@ bool CSimulation::LoadMaps()
 void CSimulation::Advance( CRobot& aWallRobot, CLineRobot& aLineRobot ) const
 {
     // Each robot freezes at its finishing point while the other completes.
-    if( !aWallRobot.HasCompletedLap() ) { aWallRobot.Update( mWalls.GetVertices() ); }
+    if( !aWallRobot.HasCompletedLap() )
+    {
+        aWallRobot.Update( mWalls.GetVertices() );
+    }
     aLineRobot.Update( mLine.GetVertices(), mWalls.GetVertices() );
 }
 
@@ -93,7 +99,10 @@ int CSimulation::Run()
             PrintSummary( WallRobot, LineRobot );
         }
         const int MaximumCollisions = 10;
-        if( Finished && WallRobot.GetCollisionCount() <= MaximumCollisions ) { Result = 0; }
+        if( Finished && WallRobot.GetCollisionCount() <= MaximumCollisions )
+        {
+            Result = 0;
+        }
     }
     return Result;
 }

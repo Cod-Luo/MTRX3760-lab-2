@@ -54,12 +54,21 @@ float CLineSensor::DistanceTo( const Vec2D& aPoint, const std::vector<Vec2D>& aL
 
         // A zero-length segment leaves Fraction at zero and is safely treated
         // as a single point rather than causing division by zero.
-        if( Fraction < 0.0f ) { Fraction = 0.0f; }
-        if( Fraction > 1.0f ) { Fraction = 1.0f; }
+        if( Fraction < 0.0f )
+        {
+            Fraction = 0.0f;
+        }
+        if( Fraction > 1.0f )
+        {
+            Fraction = 1.0f;
+        }
         const float OffsetX = aPoint.x - (Start.x + Fraction * Dx);
         const float OffsetY = aPoint.y - (Start.y + Fraction * Dy);
         const float Distance = std::sqrt( OffsetX * OffsetX + OffsetY * OffsetY );
-        if( Distance < Closest ) { Closest = Distance; }
+        if( Distance < Closest )
+        {
+            Closest = Distance;
+        }
     }
     return Closest;
 }

@@ -1,4 +1,4 @@
-// CSimulation.h - Owns the maps and 20 independently seeded robots of each type.
+// CSimulation.h - Owns the maps and 20 robots of each type.
 #ifndef CSIMULATION_H
 #define CSIMULATION_H
 #include "CLoopReader.h"
@@ -12,7 +12,7 @@ class CSimulation
         int Run();
     private:
         bool LoadMaps();
-        void CreateRobots( unsigned int aSeed );
+        void CreateRobots();
         void Advance();
         int CountCompleted( bool aWall ) const;
         bool AllCompleted() const;

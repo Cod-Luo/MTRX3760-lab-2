@@ -1,4 +1,4 @@
-// CLineRobot.h - A2's two binary line sensors with shared noisy motion.
+// CLineRobot.h - Two binary line sensors and corner recovery under noise.
 #ifndef CLINEROBOT_H
 #define CLINEROBOT_H
 #include "CLineSensor.h"
@@ -8,7 +8,7 @@ class CLineRobot
 {
     public:
         // Creates a line follower at the supplied map pose. Heading is radians.
-        CLineRobot( const Vec2D& aStart, float aHeading, unsigned int aSeed );
+        CLineRobot( const Vec2D& aStart, float aHeading );
 
         // Reads both line sensors, chooses wheel speeds, and advances one step.
         void Update( const std::vector<Vec2D>& aLine );
@@ -24,5 +24,7 @@ class CLineRobot
         CNoisyMotion mMotion;
         CLineSensor mCentreSensor;
         CLineSensor mSideSensor;
+        // Remembers a right-hand recovery while both sensors are off the line.
+        bool mTurnRight;
 };
 #endif

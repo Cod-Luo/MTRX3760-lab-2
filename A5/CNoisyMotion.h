@@ -11,8 +11,9 @@ class CNoisyMotion
     public:
         // Travel and return thresholds use map distance units;
         // aHeading is measured in radians clockwise from the positive x axis.
-        CNoisyMotion( const Vec2D& aStart, float aHeading, unsigned int aSeed,
-                      float aMinimumTravel, float aReturnDistance );
+        CNoisyMotion( const Vec2D& aStart, float aHeading,
+                      float aMinimumTravel, float aReturnDistance,
+                      float aWheelNoise );
         // Wheel speeds are converted to travel using a fixed 0.03-second step.
         void Advance( float aLeftSpeed, float aRightSpeed );
 

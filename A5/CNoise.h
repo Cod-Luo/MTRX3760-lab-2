@@ -1,27 +1,22 @@
-// CNoise.h - Reproducible, independent starting-pose and wheel perturbations.
-// Each robot owns its own generator. Position offsets are uniform +/-2 units,
-// heading offsets +/-5 degrees, and per-step wheel variations are +/-15%.
-// Wheel error is relative to commanded travel, so a stopped wheel stays stopped.
+// CNoise.h - Random starting-pose and wheel-travel offsets for A5.
 #ifndef CNOISE_H
 #define CNOISE_H
-
-#include <random>
 
 class CNoise
 {
     public:
-        explicit CNoise( unsigned int aSeed );
+        CNoise( float aMaximumTravelOffset );
 
-        // Symmetric starting offsets: units for position, radians for heading.
+        // Position offsets are in map units; heading offsets are in radians.
         float PositionOffset();
         float HeadingOffset();
 
-        // Perturbs each wheel's commanded travel independently at every step.
+        // Adds an independent configured offset to each wheel's travel.
         void PerturbTravel( float& aLeft, float& aRight );
 
     private:
+        // Returns a random value between -aMagnitude and +aMagnitude.
         float Sample( float aMagnitude );
-        std::mt19937 mGenerator;
-        std::uniform_real_distribution<float> mUniform;
+        float mMaximumTravelOffset;
 };
 #endif

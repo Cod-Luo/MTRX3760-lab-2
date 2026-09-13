@@ -13,52 +13,59 @@ const int CSimulation::StepsPerFrame = 1;
 //-----------------------------------------------------------------------------
 int CSimulation::Run()
 {
+    int Result = 1;
     CLoopReader Loop;
     if( !Loop.ReadFile( "SimpleWalls.map" ) || Loop.GetVertices().size() < 3 )
     {
         std::cerr << "Could not load a valid wall map." << std::endl;
-        return 1;
     }
-
-    CRobot Robot( Loop.GetStartPose().mPosition, Loop.GetStartPose().mHeading );
-    CRender Render;
-
-    std::cout << "Wall sensors: 90 degrees="
-              << Robot.GetSensor90Distance( Loop.GetVertices() )
-              << ", 45 degrees="
-              << Robot.GetSensor45Distance( Loop.GetVertices() ) << '\n';
-
-    bool SummaryPrinted = false;
-    while( !Render.WindowShouldClose() )
+    else
     {
-        for( int i = 0; i < StepsPerFrame && !Robot.HasCompletedLap(); ++i )
+        CRobot Robot( Loop.GetStartPose().mPosition, Loop.GetStartPose().mHeading );
+        CRender Render;
+
+        std::cout << "Wall sensors: 90 degrees="
+                  << Robot.GetSensor90Distance( Loop.GetVertices() )
+                  << ", 45 degrees="
+                  << Robot.GetSensor45Distance( Loop.GetVertices() ) << '\n';
+
+        bool SummaryPrinted = false;
+        while( !Render.WindowShouldClose() )
         {
-            Robot.Update( Loop.GetVertices() );
+            for( int i = 0; i < StepsPerFrame && !Robot.HasCompletedLap(); ++i )
+            {
+                Robot.Update( Loop.GetVertices() );
+            }
+
+            Render.BeginDrawing();
+            DrawLoop( Render, Loop );
+            Robot.Draw( Render );
+            Render.EndDrawing();
+
+            if( Robot.HasCompletedLap() && !SummaryPrinted )
+            {
+                std::cout << "Wall follower: updates=" << Robot.GetUpdateCount()
+                          << ", collisions=" << Robot.GetCollisionCount()
+                          << ", lap=complete\n"
+                          << "Run complete. Close the window to exit.\n";
+                SummaryPrinted = true;
+            }
         }
 
-        Render.BeginDrawing();
-        DrawLoop( Render, Loop );
-        Robot.Draw( Render );
-        Render.EndDrawing();
-
-        if( Robot.HasCompletedLap() && !SummaryPrinted )
+        Render.CloseWindow();
+        if( !SummaryPrinted )
         {
             std::cout << "Wall follower: updates=" << Robot.GetUpdateCount()
                       << ", collisions=" << Robot.GetCollisionCount()
-                      << ", lap=complete\n"
-                      << "Run complete. Close the window to exit.\n";
-            SummaryPrinted = true;
+                      << ", lap=incomplete\n";
+        }
+        const int MaximumCollisions = 10;
+        if( Robot.HasCompletedLap() && Robot.GetCollisionCount() <= MaximumCollisions )
+        {
+            Result = 0;
         }
     }
-
-    Render.CloseWindow();
-    if( !SummaryPrinted )
-    {
-        std::cout << "Wall follower: updates=" << Robot.GetUpdateCount()
-                  << ", collisions=" << Robot.GetCollisionCount()
-                  << ", lap=incomplete\n";
-    }
-    return Robot.HasCompletedLap() ? 0 : 1;
+    return Result;
 }
 
 //-----------------------------------------------------------------------------

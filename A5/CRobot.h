@@ -8,7 +8,7 @@ class CRobot
 {
     public:
         // Creates a wall follower at the supplied map pose. Heading is radians.
-        CRobot( const Vec2D& aStart, float aHeading, unsigned int aSeed );
+        CRobot( const Vec2D& aStart, float aHeading );
 
         // Reads both range sensors, chooses wheel speeds, and advances one step.
         void Update( const std::vector<Vec2D>& aWalls );

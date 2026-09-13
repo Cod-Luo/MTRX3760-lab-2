@@ -3,9 +3,9 @@
 #include <cmath>
 
 CNoisyMotion::CNoisyMotion( const Vec2D& aStart, float aHeading,
-                          unsigned int aSeed, float aMinimumTravel,
-                          float aReturnDistance )
-    : mNoise( aSeed ), mPosition( aStart ), mHeading( aHeading ), mStart( aStart ),
+                          float aMinimumTravel,
+                          float aReturnDistance, float aWheelNoise )
+    : mNoise( aWheelNoise ), mPosition( aStart ), mHeading( aHeading ), mStart( aStart ),
       mMinimumTravel( aMinimumTravel ), mReturnDistance( aReturnDistance ),
       mTravel( 0.0f ), mLeftStart( false ), mCompleted( false ), mTrail()
 {
@@ -54,9 +54,18 @@ void CNoisyMotion::CheckLap()
     }
 }
 
-const Vec2D& CNoisyMotion::GetPosition() const { return mPosition; }
-float CNoisyMotion::GetHeading() const { return mHeading; }
-bool CNoisyMotion::HasCompletedLap() const { return mCompleted; }
+const Vec2D& CNoisyMotion::GetPosition() const
+{
+    return mPosition;
+}
+float CNoisyMotion::GetHeading() const
+{
+    return mHeading;
+}
+bool CNoisyMotion::HasCompletedLap() const
+{
+    return mCompleted;
+}
 
 void CNoisyMotion::DrawTrail( CRender& aRender, CRender::Colour aColour ) const
 {

@@ -1,14 +1,6 @@
-//-----------------------------------------------------------------------------
-// TestCRobot.cpp
-//
-// Entry point for A2. It starts one simulation containing the A1 wall follower
-// and the A2 line follower, so both robots run in the same room at the same time.
-//
-// Build:
-// g++ -Wall -Wextra TestCRobot.cpp CSimulation.cpp CLineRobot.cpp \
-//     CLineSensor.cpp CRobot.cpp CSensor.cpp CLoopReader.cpp CRender.cpp \
-//     -lraylib -o TestCRobot
-//-----------------------------------------------------------------------------
+// TestCRobot.cpp - Entry point for the A2 robot simulation.
+// Build: g++ -std=c++11 -Wall -Wextra *.cpp -lraylib -o TestCRobot
+// Run from A2 so the map files can be found.
 
 #include "CSimulation.h"
 

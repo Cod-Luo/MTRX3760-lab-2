@@ -15,18 +15,21 @@ const float CLineRobot::Radius = 15.0f;
 //-----------------------------------------------------------------------------
 CLineRobot::CLineRobot( const Vec2D& aStartPosition, float aStartHeading )
     : mPosition( aStartPosition ), mHeading( aStartHeading ), mStartPosition( aStartPosition ),
-      mCentreSensor( 0.25f, 0.0f ), mSideSensor( 0.25f, 6.0f ),
+      mCentreSensor( 4.0f, 0.0f ), mSideSensor( 4.0f, 5.0f ), mTurnRight( false ),
       mLeftSpeed( 0.0f ), mRightSpeed( 0.0f ), mDistanceTravelled( 0.0f ),
       mTrail(), mUpdates( 0 ), mCollisions( 0 ), mWasColliding( false ),
       mLeftStart( false ), mCompleted( false )
 {
-    // Both sensors sit slightly ahead of the centre to detect departures earlier.
-    // The second sensor is six units to the right to distinguish right turns.
+    // Both sensors sit ahead of the centre so corners are detected earlier.
+    // The second sensor is five units to the right to distinguish right turns.
     mTrail.push_back( mPosition );
 }
 
 //-----------------------------------------------------------------------------
-bool CLineRobot::HasCompletedLap() const { return mCompleted; }
+bool CLineRobot::HasCompletedLap() const
+{
+    return mCompleted;
+}
 
 //-----------------------------------------------------------------------------
 // The centre sensor means the robot is correctly placed and can drive ahead.
@@ -35,22 +38,28 @@ bool CLineRobot::HasCompletedLap() const { return mCompleted; }
 void CLineRobot::Steer( const std::vector<Vec2D>& aLine )
 {
     const float Speed = 30.0f;
-    const float Turn = 70.0f;
+    const float Turn = 45.0f;
+    const float CornerSpeed = 27.0f;
     const bool Centre = mCentreSensor.Read( mPosition, mHeading, aLine );
     const bool Side = mSideSensor.Read( mPosition, mHeading, aLine );
-    if( Centre )
+    float Correction = 0.0f;
+    if( Side )
     {
-        mLeftSpeed = Speed;
-        mRightSpeed = Speed;
+        mTurnRight = true;
+        Correction = Turn;
+    }
+    else if( !Centre )
+    {
+        // Continue the previous right recovery across a brief gap at a corner.
+        Correction = mTurnRight ? Turn : -Turn;
     }
     else
     {
-        // If only the right sensor sees the line, steer right. If neither
-        // sensor sees it, steer left. The average forward speed stays constant.
-        const float Correction = Side ? Turn : -Turn;
-        mLeftSpeed = Speed + Correction;
-        mRightSpeed = Speed - Correction;
+        mTurnRight = false;
     }
+    const float ForwardSpeed = Correction == 0.0f ? Speed : CornerSpeed;
+    mLeftSpeed = ForwardSpeed + Correction;
+    mRightSpeed = ForwardSpeed - Correction;
 }
 
 //-----------------------------------------------------------------------------
@@ -107,7 +116,10 @@ void CLineRobot::CheckLap()
 
     // Requiring the robot to leave the start and travel a minimum distance
     // prevents small movements around the initial pose from completing a lap.
-    if( Distance > LeaveDistance ) { mLeftStart = true; }
+    if( Distance > LeaveDistance )
+    {
+        mLeftStart = true;
+    }
     if( mLeftStart && mDistanceTravelled > MinimumTravel && Distance < ReturnDistance )
     {
         mCompleted = true;
