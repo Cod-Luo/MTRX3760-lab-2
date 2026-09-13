@@ -12,7 +12,7 @@
 int main()
 {
     // A fixed seed makes the assessed population and screenshot reproducible.
-    const unsigned int RandomSeed = 35;
+    const unsigned int RandomSeed = 20;
     std::srand( RandomSeed );
 
     CSimulation Simulation;

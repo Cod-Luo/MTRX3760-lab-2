@@ -24,11 +24,6 @@ int CSimulation::Run()
         CRobot Robot( Loop.GetStartPose().mPosition, Loop.GetStartPose().mHeading );
         CRender Render;
 
-        std::cout << "Wall sensors: 90 degrees="
-                  << Robot.GetSensor90Distance( Loop.GetVertices() )
-                  << ", 45 degrees="
-                  << Robot.GetSensor45Distance( Loop.GetVertices() ) << '\n';
-
         bool SummaryPrinted = false;
         while( !Render.WindowShouldClose() )
         {
@@ -44,10 +39,8 @@ int CSimulation::Run()
 
             if( Robot.HasCompletedLap() && !SummaryPrinted )
             {
-                std::cout << "Wall follower: updates=" << Robot.GetUpdateCount()
-                          << ", collisions=" << Robot.GetCollisionCount()
-                          << ", lap=complete\n"
-                          << "Run complete. Close the window to exit.\n";
+                std::cout << "Simulation updates: " << Robot.GetUpdateCount() << '\n'
+                          << "Total collisions: " << Robot.GetCollisionCount() << '\n';
                 SummaryPrinted = true;
             }
         }
@@ -55,9 +48,8 @@ int CSimulation::Run()
         Render.CloseWindow();
         if( !SummaryPrinted )
         {
-            std::cout << "Wall follower: updates=" << Robot.GetUpdateCount()
-                      << ", collisions=" << Robot.GetCollisionCount()
-                      << ", lap=incomplete\n";
+            std::cout << "Simulation updates: " << Robot.GetUpdateCount() << '\n'
+                      << "Total collisions: " << Robot.GetCollisionCount() << '\n';
         }
         const int MaximumCollisions = 10;
         if( Robot.HasCompletedLap() && Robot.GetCollisionCount() <= MaximumCollisions )

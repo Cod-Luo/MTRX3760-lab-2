@@ -13,8 +13,8 @@
 class CSimulation
 {
     public:
-        // Loads both courses, runs fixed simulation updates, retains the final
-        // trajectories on screen, and reports how many robots completed a lap.
+        // Loads both courses, runs fixed simulation updates, and retains the
+        // final trajectories on screen.
         int Run();
     private:
         //---Simulation setup and fixed-step updates---
@@ -24,10 +24,9 @@ class CSimulation
         int CountCompleted( bool aWall ) const;
         bool AllCompleted() const;
 
-        //---Rendering and reporting---
+        //---Rendering---
         void DrawLoop( CRender& aRender, const CLoopReader& aLoop, float aThickness ) const;
         void Draw( CRender& aRender ) const;
-        void PrintSummary( int aUpdates ) const;
 
         // Twenty of each type is required; the limit prevents an endless run
         // if unusually large accumulated noise causes a robot to lose course.

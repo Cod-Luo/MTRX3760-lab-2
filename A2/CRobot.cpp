@@ -117,7 +117,8 @@ void CRobot::CheckCollision( const std::vector<Vec2D>& aWalls )
     if( IsColliding && !mWasColliding )
     {
         mCollisionCount++;
-        std::cout << "Collision! Total so far: " << mCollisionCount << std::endl;
+        std::cout << "Wall collision at update " << mUpdateCount
+                  << "; total collisions=" << mCollisionCount << std::endl;
     }
     mWasColliding = IsColliding;
 }
@@ -153,7 +154,6 @@ void CRobot::CheckLap()
         && mDistanceTravelled > MinimumLapDistance )
     {
         mLapCompleted = true;
-        std::cout << "Lap completed! Distance travelled: " << mDistanceTravelled << std::endl;
     }
 }
 

@@ -32,7 +32,7 @@ class CNoisyMotion
                        CRender::Colour aHeadingColour ) const;
 
     private:
-        // Scales A5's baseline per-step wheel error to make its effect visible.
+        // Scales A5's baseline wheel error to a small travel perturbation.
         static const float WheelNoiseScale;
 
         // Marks the lap complete only after leaving the start, travelling the
@@ -41,8 +41,6 @@ class CNoisyMotion
 
         //---Noise, pose and completion configuration---
         CNoise mNoise;
-        float mLeftWheelScale;
-        float mRightWheelScale;
         Vec2D mPosition;
         float mHeading;
         Vec2D mStart;
