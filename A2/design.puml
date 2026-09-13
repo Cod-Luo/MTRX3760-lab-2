@@ -1,0 +1,34 @@
+@startuml
+' Major classes only; value types (Vec2D, CPose) and libraries are omitted.
+skinparam classAttributeIconSize 0
+skinparam style strictuml
+hide members
+hide circle
+
+class CSimulation
+class CLoopReader
+class CRender
+class CRobot
+class CLineRobot
+class CSensor
+class CLineSensor
+
+' mWalls and mLine are contained members; the diamond is at the owner.
+CSimulation *-- "2" CLoopReader
+
+' Run() creates the renderer and robots as locals, not contained members.
+' Association represents these uses.
+CSimulation --> CRender
+CSimulation --> CRobot
+CSimulation --> CLineRobot
+
+' Each robot contains exactly two sensors of its own type.
+CRobot *-- "2" CSensor
+CLineRobot *-- "2" CLineSensor
+
+' Draw() receives the shared renderer by reference.
+CRobot --> CRender
+CLineRobot --> CRender
+
+' No inheritance: CLineRobot and CLineSensor are independent classes.
+@enduml

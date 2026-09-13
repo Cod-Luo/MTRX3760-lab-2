@@ -1,0 +1,25 @@
+@startuml
+' Major classes only; value types (Vec2D, CPose) and libraries are omitted.
+skinparam classAttributeIconSize 0
+skinparam style strictuml
+hide members
+hide circle
+
+class CSimulation
+class CLoopReader
+class CRender
+class CRobot
+class CSensor
+
+' Run() creates and uses local objects, not CSimulation data members.
+' Association represents these uses.
+CSimulation --> CLoopReader
+CSimulation --> CRobot
+CSimulation --> CRender
+
+' The robot contains two sensor members; the diamond is at the owner.
+CRobot *-- "2" CSensor
+
+' Draw() receives the shared renderer by reference.
+CRobot --> CRender
+@enduml
