@@ -6,7 +6,7 @@
 
 CRender::CRender()
 {
-    ::InitWindow( 800, 600, "Robot Simulator" );
+    ::InitWindow( 800, 600, "MTRX3760 Lab 2 - A5 Noise Bonus" );
     ::SetTargetFPS( 60 );
 }
 CRender::~CRender() { ::CloseWindow(); }

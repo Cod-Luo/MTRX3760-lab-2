@@ -14,7 +14,7 @@ CRender::CRender()
         mScreenWidth( 800 ),
         mScreenHeight( 600 )
 {
-    InitWindow( mScreenWidth, mScreenHeight, "TODO: Replace This Text" );
+    InitWindow( mScreenWidth, mScreenHeight, "MTRX3760 Lab 2 - A2 Robot Simulator" );
     SetTargetFPS( 60 );
 }
 
