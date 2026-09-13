@@ -1,4 +1,9 @@
-// CNoisyMotion.h - Shared differential drive, noisy pose, trail and lap state.
+//-----------------------------------------------------------------------------
+// CNoisyMotion.h
+//
+// Declares the differential-drive motion, noise, trajectory and lap state
+// shared by the wall-following and line-following robots in A5.
+//-----------------------------------------------------------------------------
 #ifndef CNOISYMOTION_H
 #define CNOISYMOTION_H
 
@@ -9,12 +14,13 @@
 class CNoisyMotion
 {
     public:
-        // Travel and return thresholds use map distance units;
-        // aHeading is measured in radians clockwise from the positive x axis.
+        // Creates a robot at a randomly perturbed pose. Travel, return and
+        // wheel-noise arguments use map units; heading uses clockwise radians.
         CNoisyMotion( const Vec2D& aStart, float aHeading,
                       float aMinimumTravel, float aReturnDistance,
                       float aWheelNoise );
-        // Wheel speeds are converted to travel using a fixed 0.03-second step.
+        // Converts commanded wheel speeds into travel for one fixed 0.03-second
+        // update, adds independent wheel errors, and records the new position.
         void Advance( float aLeftSpeed, float aRightSpeed );
 
         // Read-only state used by each controller and by the simulation summary.
@@ -26,13 +32,19 @@ class CNoisyMotion
                        CRender::Colour aHeadingColour ) const;
 
     private:
+        // Marks the lap complete only after leaving the start, travelling the
+        // configured course distance and returning to the starting region.
         void CheckLap();
+
+        //---Noise, pose and completion configuration---
         CNoise mNoise;
         Vec2D mPosition;
         float mHeading;
         Vec2D mStart;
         float mMinimumTravel;
         float mReturnDistance;
+
+        //---Run state retained for the complete trajectory---
         float mTravel;
         bool mLeftStart;
         bool mCompleted;

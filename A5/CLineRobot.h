@@ -1,4 +1,9 @@
-// CLineRobot.h - Two binary line sensors and corner recovery under noise.
+//-----------------------------------------------------------------------------
+// CLineRobot.h
+//
+// Declares the A5 line follower. Two binary floor sensors select independently
+// driven wheel speeds while shared noisy motion perturbs its actual travel.
+//-----------------------------------------------------------------------------
 #ifndef CLINEROBOT_H
 #define CLINEROBOT_H
 #include "CLineSensor.h"
@@ -21,7 +26,9 @@ class CLineRobot
                    CRender::Colour aBodyColour,
                    CRender::Colour aHeadingColour ) const;
     private:
+        // Motion owns the perturbed pose, wheel model, trail and lap state.
         CNoisyMotion mMotion;
+        // One sensor tracks the line and the offset sensor recognises corners.
         CLineSensor mCentreSensor;
         CLineSensor mSideSensor;
         // Remembers a right-hand recovery while both sensors are off the line.

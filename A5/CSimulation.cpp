@@ -1,4 +1,9 @@
-// CSimulation.cpp - Simultaneous fixed-step population experiment for A5.
+//-----------------------------------------------------------------------------
+// CSimulation.cpp
+//
+// Implements the simultaneous A5 population experiment, including map setup,
+// fixed-step updates, distinct trajectory rendering and completion reporting.
+//-----------------------------------------------------------------------------
 #include "CSimulation.h"
 #include <iostream>
 
@@ -16,6 +21,8 @@ bool CSimulation::LoadMaps()
 
 void CSimulation::CreateRobots()
 {
+    // Constructing each robot samples a new starting pose. Reserving first
+    // avoids reallocating and copying the growing populations.
     mWallRobots.clear();
     mLineRobots.clear();
     mWallRobots.reserve( RobotsPerType );
@@ -31,6 +38,7 @@ void CSimulation::CreateRobots()
 
 void CSimulation::Advance()
 {
+    // Every active robot receives exactly one equal-duration simulation step.
     for( int i = 0; i < RobotsPerType; ++i )
     {
         mWallRobots[i].Update( mWalls.GetVertices() );
@@ -40,6 +48,7 @@ void CSimulation::Advance()
 
 int CSimulation::CountCompleted( bool aWall ) const
 {
+    // aWall selects the population while keeping the counting rule in one place.
     int Count = 0;
     for( int i = 0; i < RobotsPerType; ++i )
     {
@@ -70,8 +79,8 @@ void CSimulation::DrawLoop( CRender& aRender, const CLoopReader& aLoop, float aT
 
 void CSimulation::Draw( CRender& aRender ) const
 {
-    // Every robot has its own shade. Wall followers remain yellow/orange and
-    // line followers remain green/cyan, so the two types are still recognisable.
+    // Every robot has a distinct trail colour so nearby noisy trajectories can
+    // still be distinguished in the required end-of-run screenshot.
     const int TrailColourCount = 20;
     const CRender::Colour WallTrailColours[TrailColourCount] = {
         { 255, 255, 40, 255 }, { 255, 235, 0, 255 },   { 255, 210, 0, 255 },
@@ -124,6 +133,8 @@ int CSimulation::Run()
         CRender Render;
         while( !Render.WindowShouldClose() )
         {
+            // Movement stops after completion or the safety limit, but drawing
+            // continues so the full set of trajectories remains visible.
             if( !AllCompleted() && Updates < MaximumUpdates )
             {
                 Advance();

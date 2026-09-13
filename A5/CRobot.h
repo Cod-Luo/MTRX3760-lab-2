@@ -1,4 +1,9 @@
-// CRobot.h - A2's two-range-sensor controller with shared noisy motion.
+//-----------------------------------------------------------------------------
+// CRobot.h
+//
+// Declares the A5 wall follower. Its two right-facing range sensors control
+// independently driven wheels through the shared noisy-motion model.
+//-----------------------------------------------------------------------------
 #ifndef CROBOT_H
 #define CROBOT_H
 #include "CSensor.h"
@@ -21,7 +26,9 @@ class CRobot
                    CRender::Colour aBodyColour,
                    CRender::Colour aHeadingColour ) const;
     private:
+        // Motion owns the perturbed pose, wheel model, trail and lap state.
         CNoisyMotion mMotion;
+        // The required sensors face directly right and forward-right.
         CSensor mSensor90;
         CSensor mSensor45;
 };

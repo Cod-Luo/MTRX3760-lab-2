@@ -1,4 +1,9 @@
-// CRender.h - All raylib access and colour conversion stay behind this interface.
+//-----------------------------------------------------------------------------
+// CRender.h
+//
+// Declares the drawing interface used by A5. Raylib types and calls remain in
+// CRender.cpp, leaving simulation classes dependent only on simple C++ types.
+//-----------------------------------------------------------------------------
 #ifndef CRENDER_H
 #define CRENDER_H
 
@@ -21,16 +26,23 @@ class CRender
             unsigned char b;
             unsigned char a;
         };
+
+        // Opens and closes the single simulation window.
         CRender();
         ~CRender();
+
+        // Reports window-close input and brackets one rendered frame.
         bool WindowShouldClose() const;
         void BeginDrawing();
         void EndDrawing();
+
+        // Draws simulator geometry using wrapper-owned colours.
         void DrawCircle( Vec2D aPosition, int aRadius, Colour aColour );
         void DrawLine( Vec2D aStart, Vec2D aEnd, float aThickness, Colour aColour );
         // Draws every point in a trajectory as one connected path.
         void DrawLineStrip( const std::vector<Vec2D>& aPoints, Colour aColour );
     private:
+        // A window owner cannot be copied safely.
         CRender( const CRender& ) = delete;
         CRender& operator=( const CRender& ) = delete;
 };

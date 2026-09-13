@@ -1,4 +1,9 @@
-// CRender.cpp - Raylib window and drawing implementation.
+//-----------------------------------------------------------------------------
+// CRender.cpp
+//
+// Implements A5 drawing and converts the wrapper's plain geometry and colours
+// to raylib values. This is the only A5 source file that accesses raylib.
+//-----------------------------------------------------------------------------
 #include "CRender.h"
 #include "raylib.h"
 

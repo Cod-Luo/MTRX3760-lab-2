@@ -1,4 +1,9 @@
-// CNoisyMotion.cpp - Both controllers share the same physical noise model.
+//-----------------------------------------------------------------------------
+// CNoisyMotion.cpp
+//
+// Implements the common noisy differential-drive model so both controllers
+// experience the same physical assumptions without duplicating motion code.
+//-----------------------------------------------------------------------------
 #include "CNoisyMotion.h"
 #include <cmath>
 
@@ -9,6 +14,8 @@ CNoisyMotion::CNoisyMotion( const Vec2D& aStart, float aHeading,
       mMinimumTravel( aMinimumTravel ), mReturnDistance( aReturnDistance ),
       mTravel( 0.0f ), mLeftStart( false ), mCompleted( false ), mTrail()
 {
+    // Each robot receives its own independent x, y and heading samples before
+    // sensing begins. The perturbed pose becomes its lap-completion reference.
     mPosition.x += mNoise.PositionOffset();
     mPosition.y += mNoise.PositionOffset();
     mHeading += mNoise.HeadingOffset();
@@ -21,10 +28,13 @@ void CNoisyMotion::Advance( float aLeftSpeed, float aRightSpeed )
     if( !mCompleted )
     {
         const float TimeStep = 0.03f;
+        // Twice the required 15-unit radius places one wheel on either side.
         const float WheelBase = 30.0f;
         float LeftTravel = aLeftSpeed * TimeStep;
         float RightTravel = aRightSpeed * TimeStep;
         mNoise.PerturbTravel( LeftTravel, RightTravel );
+        // The mean wheel travel advances the centre; their difference rotates
+        // the robot according to the differential-drive model.
         const float Travel = (LeftTravel + RightTravel) / 2.0f;
         mHeading += (LeftTravel - RightTravel) / WheelBase;
         mPosition.x += Travel * std::cos( mHeading );

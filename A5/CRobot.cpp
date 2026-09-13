@@ -1,4 +1,10 @@
-// CRobot.cpp - Sensor feedback steers; wheel noise is applied after control.
+//-----------------------------------------------------------------------------
+// CRobot.cpp
+//
+// Implements A2's range-sensor feedback controller on top of A5's noisy
+// motion. Noise changes actual wheel travel after the controller issues its
+// commands, allowing the controller to respond naturally on the next update.
+//-----------------------------------------------------------------------------
 #include "CRobot.h"
 
 CRobot::CRobot( const Vec2D& aStart, float aHeading )
@@ -14,12 +20,17 @@ void CRobot::Update( const std::vector<Vec2D>& aWalls )
     if( !mMotion.HasCompletedLap() )
     {
         const float BaseSpeed = 42.0f;
+        // The side sensor controls clearance while the diagonal sensor warns
+        // of approaching corners. Its target is sqrt(2) times the clearance.
         const float TargetSideDistance = 45.0f;
         const float TargetDiagonalDistance = TargetSideDistance * 1.41421356f;
         const float MaxSensorDistance = 120.0f;
         const float SideGain = 2.1f;
         const float DiagonalGain = 4.2f;
         const float MaxTurn = 157.5f;
+
+        // Limit missing or very distant readings so open space cannot create
+        // an unbounded steering correction.
         float Dist90 = mSensor90.GetDistance( mMotion.GetPosition(), mMotion.GetHeading(), aWalls );
         float Dist45 = mSensor45.GetDistance( mMotion.GetPosition(), mMotion.GetHeading(), aWalls );
         if( Dist90 > MaxSensorDistance )
@@ -30,6 +41,7 @@ void CRobot::Update( const std::vector<Vec2D>& aWalls )
         {
             Dist45 = MaxSensorDistance;
         }
+        // Positive correction turns right; negative correction turns left.
         float Turn = SideGain * (Dist90 - TargetSideDistance)
                    + DiagonalGain * (Dist45 - TargetDiagonalDistance);
         if( Turn > MaxTurn )

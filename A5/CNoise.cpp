@@ -1,4 +1,9 @@
-// CNoise.cpp - Uses the rand() approach shown in the lectures and example code.
+//-----------------------------------------------------------------------------
+// CNoise.cpp
+//
+// Implements the small, uniformly distributed pose and wheel-travel offsets
+// used to produce a believable spread of A5 trajectories.
+//-----------------------------------------------------------------------------
 #include "CNoise.h"
 #include <cstdlib>
 
@@ -15,18 +20,24 @@ float CNoise::Sample( float aMagnitude )
 
 float CNoise::PositionOffset()
 {
+    // Two map units vary the starting point without moving a robot away from
+    // the wall or line that its controller must initially detect.
     const float MaximumOffset = 2.0f;
     return Sample( MaximumOffset );
 }
 
 float CNoise::HeadingOffset()
 {
+    // A five-degree error is visible over a lap but small enough for both
+    // sensor-driven controllers to recover reliably.
     const float MaximumRadians = 5.0f * 3.14159265f / 180.0f;
     return Sample( MaximumRadians );
 }
 
 void CNoise::PerturbTravel( float& aLeft, float& aRight )
 {
+    // Independent samples model the two wheels slipping by different amounts;
+    // their difference also introduces a small heading error.
     aLeft += Sample( mMaximumTravelOffset );
     aRight += Sample( mMaximumTravelOffset );
 }
