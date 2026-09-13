@@ -8,34 +8,35 @@
 
 #include "CLoopReader.h"
 
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 //---Degrees in the file are converted to radians for use in the program.------
-const float CLoopReader::DegreesToRadians = 3.14159265f / 180.0f;
+static const float kDegreesToRadians = float( M_PI ) / 180.0f;
 
 
 //-----------------------------------------------------------------------------
 CLoopReader::CLoopReader()
     :
-        mStartPosition( { 0.0f, 0.0f } ),
-        mStartHeading( 0.0f )
+        mStartPose( { { 0.0f, 0.0f }, 0.0f } )
 {
 }
 
 
 //-----------------------------------------------------------------------------
-const Vec2D& CLoopReader::GetStartPosition() const
+const std::string& CLoopReader::GetName() const
 {
-    return mStartPosition;
+    return mName;
 }
 
 
 //-----------------------------------------------------------------------------
-float CLoopReader::GetStartHeading() const
+const CPose& CLoopReader::GetStartPose() const
 {
-    return mStartHeading;
+    return mStartPose;
 }
 
 
@@ -49,11 +50,6 @@ const std::vector<Vec2D>& CLoopReader::GetVertices() const
 //-----------------------------------------------------------------------------
 bool CLoopReader::ReadFile( const std::string& arFilename )
 {
-    // A reader can be reused without retaining data from the previous map.
-    mStartPosition = Vec2D{ 0.0f, 0.0f };
-    mStartHeading = 0.0f;
-    mVertices.clear();
-
     bool Okay = true;
 
     std::ifstream File( arFilename );
@@ -66,8 +62,6 @@ bool CLoopReader::ReadFile( const std::string& arFilename )
     std::string Line;
     int LineNumber = 0;
     bool HaveLoop = false;
-    bool HaveStartPose = false;
-    std::string LoopName;
 
     while( Okay && std::getline( File, Line ) )
     {
@@ -94,7 +88,7 @@ bool CLoopReader::ReadFile( const std::string& arFilename )
                               << " (a file describes one loop)" << std::endl;
                     Okay = false;
                 }
-                else if( !(Words >> LoopName) )
+                else if( !(Words >> mName) )
                 {
                     std::cout << "CLoopReader: 'loop' needs a name on line "
                               << LineNumber << std::endl;
@@ -110,13 +104,7 @@ bool CLoopReader::ReadFile( const std::string& arFilename )
                 float X = 0.0f;
                 float Y = 0.0f;
                 float HeadingDegrees = 0.0f;
-                if( HaveStartPose )
-                {
-                    std::cout << "CLoopReader: a second 'startpose' on line "
-                              << LineNumber << std::endl;
-                    Okay = false;
-                }
-                else if( !(Words >> X >> Y >> HeadingDegrees) )
+                if( !(Words >> X >> Y >> HeadingDegrees) )
                 {
                     std::cout << "CLoopReader: 'startpose' needs x, y and heading on line "
                               << LineNumber << std::endl;
@@ -130,9 +118,7 @@ bool CLoopReader::ReadFile( const std::string& arFilename )
                 }
                 else
                 {
-                    mStartPosition = Vec2D{ X, Y };
-                    mStartHeading = HeadingDegrees * DegreesToRadians;
-                    HaveStartPose = true;
+                    mStartPose = CPose{ { X, Y }, HeadingDegrees * kDegreesToRadians };
                 }
             }
             else if( Keyword == "vertex" )
@@ -164,13 +150,6 @@ bool CLoopReader::ReadFile( const std::string& arFilename )
             }
         }
     }
-
-    if( Okay && (!HaveLoop || !HaveStartPose || mVertices.size() < 3) )
-    {
-        std::cout << "CLoopReader: file needs one loop, a startpose and at least three vertices"
-                  << std::endl;
-        Okay = false;
-    }
-
+    
     return Okay;
 }

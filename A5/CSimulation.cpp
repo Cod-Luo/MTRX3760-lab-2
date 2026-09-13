@@ -22,10 +22,10 @@ void CSimulation::CreateRobots()
     mLineRobots.reserve( RobotsPerType );
     for( int i = 0; i < RobotsPerType; ++i )
     {
-        mWallRobots.push_back( CRobot( mWalls.GetStartPosition(),
-                                      mWalls.GetStartHeading() ) );
-        mLineRobots.push_back( CLineRobot( mLine.GetStartPosition(),
-                                          mLine.GetStartHeading() ) );
+        mWallRobots.push_back( CRobot( mWalls.GetStartPose().mPosition,
+                                      mWalls.GetStartPose().mHeading ) );
+        mLineRobots.push_back( CLineRobot( mLine.GetStartPose().mPosition,
+                                          mLine.GetStartPose().mHeading ) );
     }
 }
 
