@@ -219,11 +219,11 @@ void CRobot::Draw( CRender& aRender ) const
 
     aRender.DrawCircle( mPosition, (int)Radius, RED );
 
-    const float HeadingLineLength = Radius * 2.0f;
+    const float HeadingLineLength = Radius;
     Vec2D HeadingEnd;
     HeadingEnd.x = mPosition.x + HeadingLineLength * std::cos( mHeading );
     HeadingEnd.y = mPosition.y + HeadingLineLength * std::sin( mHeading );
-    aRender.DrawLine( mPosition, HeadingEnd, 2.0f, RED );
+    aRender.DrawLine( mPosition, HeadingEnd, 2.0f, YELLOW );
 }
 
 //-----------------------------------------------------------------------------

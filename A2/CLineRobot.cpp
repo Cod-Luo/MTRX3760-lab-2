@@ -132,9 +132,9 @@ void CLineRobot::Draw( CRender& aRender ) const
 {
     for( std::size_t i = 1; i < mTrail.size(); ++i )
     {
-        aRender.DrawLine( mTrail[i - 1], mTrail[i], 1.0f, GREEN );
+        aRender.DrawLine( mTrail[i - 1], mTrail[i], 2.0f, MAGENTA );
     }
-    aRender.DrawLine( mTrail.back(), mPosition, 1.0f, GREEN );
+    aRender.DrawLine( mTrail.back(), mPosition, 2.0f, MAGENTA );
     aRender.DrawCircle( mPosition, int( Radius ), SKYBLUE );
     const Vec2D HeadingEnd = { mPosition.x + Radius * std::cos( mHeading ),
                                mPosition.y + Radius * std::sin( mHeading ) };
