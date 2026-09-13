@@ -21,7 +21,7 @@ int CSimulation::Run()
     }
     else
     {
-        CRobot Robot( Loop.GetStartPose().mPosition, Loop.GetStartPose().mHeading );
+        CWallRobot Robot( Loop.GetStartPose().mPosition, Loop.GetStartPose().mHeading );
         CRender Render;
 
         bool SummaryPrinted = false;

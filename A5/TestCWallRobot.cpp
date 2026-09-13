@@ -1,8 +1,8 @@
 //-----------------------------------------------------------------------------
-// TestCRobot.cpp
+// TestCWallRobot.cpp
 //
 // Entry point for the A5 noisy-population simulation.
-// Build: g++ -std=c++11 -Wall -Wextra *.cpp -lraylib -o TestCRobot
+// Build: g++ -std=c++11 -Wall -Wextra *.cpp -lraylib -o TestCWallRobot
 // Run from A5 so the map files can be found.
 //-----------------------------------------------------------------------------
 

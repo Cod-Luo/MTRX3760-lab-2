@@ -1,13 +1,13 @@
 //-----------------------------------------------------------------------------
-// CRobot.cpp
+// CWallRobot.cpp
 //
 // Implements A2's range-sensor feedback controller on top of A5's noisy
 // motion. Noise changes actual wheel travel after the controller issues its
 // commands, allowing the controller to respond naturally on the next update.
 //-----------------------------------------------------------------------------
-#include "CRobot.h"
+#include "CWallRobot.h"
 
-CRobot::CRobot( const Vec2D& aStart, float aHeading )
+CWallRobot::CWallRobot( const Vec2D& aStart, float aHeading )
     // Preserve A2's minimum travel. The wider return tolerance accommodates
     // the deliberately perturbed starting pose.
     : mMotion( aStart, aHeading, 1500.0f, 15.0f, 1.0f ),
@@ -15,7 +15,7 @@ CRobot::CRobot( const Vec2D& aStart, float aHeading )
 {
 }
 
-void CRobot::Update( const std::vector<Vec2D>& aWalls )
+void CWallRobot::Update( const std::vector<Vec2D>& aWalls )
 {
     if( !mMotion.HasCompletedLap() )
     {
@@ -56,12 +56,12 @@ void CRobot::Update( const std::vector<Vec2D>& aWalls )
     }
 }
 
-bool CRobot::HasCompletedLap() const
+bool CWallRobot::HasCompletedLap() const
 {
     return mMotion.HasCompletedLap();
 }
 
-void CRobot::Draw( CRender& aRender, CRender::Colour aTrailColour,
+void CWallRobot::Draw( CRender& aRender, CRender::Colour aTrailColour,
                    CRender::Colour aBodyColour,
                    CRender::Colour aHeadingColour ) const
 {

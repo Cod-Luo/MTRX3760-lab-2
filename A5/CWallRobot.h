@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// CRobot.h
+// CWallRobot.h
 //
 // Declares the A5 wall follower. Its two right-facing range sensors control
 // independently driven wheels through the shared noisy-motion model.
@@ -9,11 +9,11 @@
 #include "CSensor.h"
 #include "CNoisyMotion.h"
 
-class CRobot
+class CWallRobot
 {
     public:
         // Creates a wall follower at the supplied map pose. Heading is radians.
-        CRobot( const Vec2D& aStart, float aHeading );
+        CWallRobot( const Vec2D& aStart, float aHeading );
 
         // Reads both range sensors, chooses wheel speeds, and advances one step.
         void Update( const std::vector<Vec2D>& aWalls );
