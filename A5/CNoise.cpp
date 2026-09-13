@@ -34,6 +34,14 @@ float CNoise::HeadingOffset()
     return Sample( MaximumRadians );
 }
 
+float CNoise::WheelScale()
+{
+    // A six-percent calibration range creates persistent lateral variation
+    // while leaving the sensor feedback strong enough to complete each course.
+    const float MaximumScaleError = 0.06f;
+    return 1.0f + Sample( MaximumScaleError );
+}
+
 void CNoise::PerturbTravel( float& aLeft, float& aRight )
 {
     // Independent samples model the two wheels slipping by different amounts;

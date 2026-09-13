@@ -18,6 +18,10 @@ class CNoise
         float PositionOffset();
         float HeadingOffset();
 
+        // Returns a fixed wheel scale for one robot. A small calibration bias
+        // persists across updates so controllers do not erase all variation.
+        float WheelScale();
+
         // Adds an independent configured offset to each wheel's travel.
         void PerturbTravel( float& aLeft, float& aRight );
 

@@ -7,10 +7,14 @@
 #include "CNoisyMotion.h"
 #include <cmath>
 
+const float CNoisyMotion::WheelNoiseScale = 1.5f;
+
 CNoisyMotion::CNoisyMotion( const Vec2D& aStart, float aHeading,
                           float aMinimumTravel,
                           float aReturnDistance, float aWheelNoise )
-    : mNoise( aWheelNoise ), mPosition( aStart ), mHeading( aHeading ), mStart( aStart ),
+    : mNoise( WheelNoiseScale * aWheelNoise ), mLeftWheelScale( mNoise.WheelScale() ),
+      mRightWheelScale( mNoise.WheelScale() ), mPosition( aStart ),
+      mHeading( aHeading ), mStart( aStart ),
       mMinimumTravel( aMinimumTravel ), mReturnDistance( aReturnDistance ),
       mTravel( 0.0f ), mLeftStart( false ), mCompleted( false ), mTrail()
 {
@@ -30,8 +34,10 @@ void CNoisyMotion::Advance( float aLeftSpeed, float aRightSpeed )
         const float TimeStep = 0.03f;
         // Twice the required 15-unit radius places one wheel on either side.
         const float WheelBase = 30.0f;
-        float LeftTravel = aLeftSpeed * TimeStep;
-        float RightTravel = aRightSpeed * TimeStep;
+        // Each robot retains a small wheel-calibration error, then receives the
+        // required independent random travel offset on this particular step.
+        float LeftTravel = aLeftSpeed * TimeStep * mLeftWheelScale;
+        float RightTravel = aRightSpeed * TimeStep * mRightWheelScale;
         mNoise.PerturbTravel( LeftTravel, RightTravel );
         // The mean wheel travel advances the centre; their difference rotates
         // the robot according to the differential-drive model.

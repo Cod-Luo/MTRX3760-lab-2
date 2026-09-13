@@ -42,8 +42,9 @@ class CRender
         // Draws every point in a trajectory as one connected path.
         void DrawLineStrip( const std::vector<Vec2D>& aPoints, Colour aColour );
     private:
-        // A window owner cannot be copied safely.
-        CRender( const CRender& ) = delete;
-        CRender& operator=( const CRender& ) = delete;
+        // A window owner cannot be copied safely. Private declarations prevent
+        // copying using the copy-constructor syntax covered in Week 4.
+        CRender( const CRender& );
+        CRender& operator=( const CRender& );
 };
 #endif

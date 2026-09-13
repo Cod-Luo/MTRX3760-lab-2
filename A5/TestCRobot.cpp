@@ -7,9 +7,14 @@
 //-----------------------------------------------------------------------------
 
 #include "CSimulation.h"
+#include <cstdlib>
 
 int main()
 {
+    // A fixed seed makes the assessed population and screenshot reproducible.
+    const unsigned int RandomSeed = 35;
+    std::srand( RandomSeed );
+
     CSimulation Simulation;
     return Simulation.Run();
 }

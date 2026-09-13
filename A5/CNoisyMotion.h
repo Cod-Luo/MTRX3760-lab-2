@@ -32,12 +32,17 @@ class CNoisyMotion
                        CRender::Colour aHeadingColour ) const;
 
     private:
+        // Scales A5's baseline per-step wheel error to make its effect visible.
+        static const float WheelNoiseScale;
+
         // Marks the lap complete only after leaving the start, travelling the
         // configured course distance and returning to the starting region.
         void CheckLap();
 
         //---Noise, pose and completion configuration---
         CNoise mNoise;
+        float mLeftWheelScale;
+        float mRightWheelScale;
         Vec2D mPosition;
         float mHeading;
         Vec2D mStart;
