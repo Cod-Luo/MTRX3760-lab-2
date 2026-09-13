@@ -123,7 +123,6 @@ void CLineRobot::CheckLap()
     if( mLeftStart && mDistanceTravelled > MinimumTravel && Distance < ReturnDistance )
     {
         mCompleted = true;
-        std::cout << "Line lap completed at update " << mUpdates << '\n';
     }
 }
 
@@ -144,6 +143,6 @@ void CLineRobot::Draw( CRender& aRender ) const
 //-----------------------------------------------------------------------------
 void CLineRobot::PrintSummary() const
 {
-    std::cout << "Line follower: updates=" << mUpdates << ", collisions=" << mCollisions
-              << ", lap=" << (mCompleted ? "complete" : "incomplete") << '\n';
+    std::cout << "Line follower updates: " << mUpdates << '\n'
+              << "Line follower collisions: " << mCollisions << '\n';
 }

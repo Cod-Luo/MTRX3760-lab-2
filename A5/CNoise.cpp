@@ -1,14 +1,16 @@
 //-----------------------------------------------------------------------------
 // CNoise.cpp
 //
-// Implements the small, uniformly distributed pose and wheel-travel offsets
-// used to produce a believable spread of A5 trajectories.
+// Implements bounded random pose offsets and slowly varying wheel slip used
+// to produce a believable spread of A5 trajectories.
 //-----------------------------------------------------------------------------
 #include "CNoise.h"
 #include <cstdlib>
 
 CNoise::CNoise( float aMaximumTravelOffset )
-    : mMaximumTravelOffset( aMaximumTravelOffset )
+    : mMaximumTravelOffset( aMaximumTravelOffset ),
+      mLeftTravelOffset( Sample( aMaximumTravelOffset ) ),
+      mRightTravelOffset( Sample( aMaximumTravelOffset ) )
 {
 }
 
@@ -34,18 +36,32 @@ float CNoise::HeadingOffset()
     return Sample( MaximumRadians );
 }
 
-float CNoise::WheelScale()
-{
-    // A six-percent calibration range creates persistent lateral variation
-    // while leaving the sensor feedback strong enough to complete each course.
-    const float MaximumScaleError = 0.50f;
-    return 1.0f + Sample( MaximumScaleError );
-}
-
 void CNoise::PerturbTravel( float& aLeft, float& aRight )
 {
-    // Independent samples model the two wheels slipping by different amounts;
-    // their difference also introduces a small heading error.
-    aLeft += Sample( mMaximumTravelOffset );
-    aRight += Sample( mMaximumTravelOffset );
+    // Slowly varying slip persists long enough to alter the visible path. A
+    // fresh independent sample still changes each wheel on every update.
+    const float Retention = 0.98f;
+    const float ChangeMagnitude = 0.10f * mMaximumTravelOffset;
+    mLeftTravelOffset = Retention * mLeftTravelOffset + Sample( ChangeMagnitude );
+    mRightTravelOffset = Retention * mRightTravelOffset + Sample( ChangeMagnitude );
+
+    if( mLeftTravelOffset > mMaximumTravelOffset )
+    {
+        mLeftTravelOffset = mMaximumTravelOffset;
+    }
+    if( mLeftTravelOffset < -mMaximumTravelOffset )
+    {
+        mLeftTravelOffset = -mMaximumTravelOffset;
+    }
+    if( mRightTravelOffset > mMaximumTravelOffset )
+    {
+        mRightTravelOffset = mMaximumTravelOffset;
+    }
+    if( mRightTravelOffset < -mMaximumTravelOffset )
+    {
+        mRightTravelOffset = -mMaximumTravelOffset;
+    }
+
+    aLeft += mLeftTravelOffset;
+    aRight += mRightTravelOffset;
 }

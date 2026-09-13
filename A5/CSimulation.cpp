@@ -83,13 +83,13 @@ void CSimulation::Draw( CRender& aRender ) const
     // still be distinguished in the required end-of-run screenshot.
     const int TrailColourCount = 20;
     const CRender::Colour WallTrailColours[TrailColourCount] = {
-        { 255, 255, 40, 255 }, { 255, 235, 0, 255 },   { 255, 210, 0, 255 },
-        { 255, 180, 0, 255 },  { 255, 145, 0, 255 },   { 255, 110, 0, 255 },
-        { 255, 75, 0, 255 },   { 255, 125, 45, 255 },  { 245, 165, 35, 255 },
-        { 235, 205, 25, 255 }, { 220, 240, 20, 255 },  { 195, 255, 35, 255 },
-        { 230, 230, 80, 255 }, { 255, 200, 80, 255 },  { 255, 165, 80, 255 },
-        { 255, 130, 80, 255 }, { 240, 180, 100, 255 }, { 225, 220, 100, 255 },
-        { 210, 250, 100, 255 },{ 255, 245, 130, 255 }
+        { 255, 50, 50, 255 },   { 255, 120, 30, 255 },  { 255, 200, 30, 255 },
+        { 210, 255, 40, 255 },  { 90, 240, 60, 255 },   { 20, 220, 130, 255 },
+        { 20, 220, 220, 255 },  { 40, 150, 255, 255 },  { 70, 80, 255, 255 },
+        { 150, 70, 255, 255 },  { 230, 60, 240, 255 },  { 255, 60, 160, 255 },
+        { 255, 130, 130, 255 }, { 255, 175, 90, 255 },  { 245, 235, 100, 255 },
+        { 150, 255, 110, 255 }, { 90, 245, 190, 255 },  { 100, 210, 255, 255 },
+        { 140, 140, 255, 255 }, { 235, 130, 255, 255 }
     };
     const CRender::Colour LineTrailColours[TrailColourCount] = {
         { 255, 35, 35, 255 },   { 30, 110, 255, 255 },  { 220, 40, 220, 255 },
@@ -115,13 +115,6 @@ void CSimulation::Draw( CRender& aRender ) const
     aRender.EndDrawing();
 }
 
-void CSimulation::PrintSummary( int aUpdates ) const
-{
-    std::cout << "Simulation updates: " << aUpdates << '\n'
-              << "Completed: wall " << CountCompleted( true ) << '/' << RobotsPerType
-              << ", line " << CountCompleted( false ) << '/' << RobotsPerType << '\n';
-}
-
 int CSimulation::Run()
 {
     int Result = 1;
@@ -129,7 +122,6 @@ int CSimulation::Run()
     {
         CreateRobots();
         int Updates = 0;
-        bool SummaryPrinted = false;
         CRender Render;
         while( !Render.WindowShouldClose() )
         {
@@ -140,17 +132,7 @@ int CSimulation::Run()
                 Advance();
                 ++Updates;
             }
-            const bool Stopped = AllCompleted() || Updates == MaximumUpdates;
             Draw( Render );
-            if( Stopped && !SummaryPrinted )
-            {
-                PrintSummary( Updates );
-                SummaryPrinted = true;
-            }
-        }
-        if( !SummaryPrinted )
-        {
-            PrintSummary( Updates );
         }
         // A5 requires most of each type, and does not grade collision counts.
         if( CountCompleted( true ) > RobotsPerType / 2

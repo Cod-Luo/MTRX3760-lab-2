@@ -47,9 +47,8 @@ void CSimulation::DrawLoop( CRender& aRender, const CLoopReader& aLoop, float aT
 //-----------------------------------------------------------------------------
 void CSimulation::PrintSummary( const CRobot& aWallRobot, const CLineRobot& aLineRobot ) const
 {
-    std::cout << "Wall follower: updates=" << aWallRobot.GetUpdateCount()
-              << ", collisions=" << aWallRobot.GetCollisionCount()
-              << ", lap=" << (aWallRobot.HasCompletedLap() ? "complete" : "incomplete") << '\n';
+    std::cout << "Wall follower updates: " << aWallRobot.GetUpdateCount() << '\n'
+              << "Wall follower collisions: " << aWallRobot.GetCollisionCount() << '\n';
     aLineRobot.PrintSummary();
 }
 
@@ -61,8 +60,6 @@ int CSimulation::Run()
     {
         CRobot WallRobot( mWalls.GetStartPose().mPosition, mWalls.GetStartPose().mHeading );
         CLineRobot LineRobot( mLine.GetStartPose().mPosition, mLine.GetStartPose().mHeading );
-        std::cout << "Wall sensors: 90 degrees=" << WallRobot.GetSensor90Distance( mWalls.GetVertices() )
-                  << ", 45 degrees=" << WallRobot.GetSensor45Distance( mWalls.GetVertices() ) << '\n';
         const int MaximumUpdates = 200000;
         int Updates = 0;
         bool Finished = false;
@@ -89,7 +86,6 @@ int CSimulation::Run()
             if( !SummaryPrinted && (Finished || Updates == MaximumUpdates) )
             {
                 PrintSummary( WallRobot, LineRobot );
-                std::cout << "Run stopped. The trails remain visible; close the window to exit.\n";
                 SummaryPrinted = true;
             }
         }
